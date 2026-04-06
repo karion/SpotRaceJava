@@ -1,0 +1,14 @@
+FROM eclipse-temurin:21-jdk
+
+WORKDIR /workspace
+
+RUN apt-get update && apt-get install -y curl unzip bash && rm -rf /var/lib/apt/lists/*
+
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+
+RUN chmod +x mvnw
+RUN ./mvnw -q -DskipTests dependency:go-offline || true
+
+EXPOSE 8081 5005

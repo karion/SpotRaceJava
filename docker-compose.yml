@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile.dev
+    command: ./mvnw spring-boot:run
+    ports:
+      - "8081:8081"
+      - "5005:5005"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/myapp
+      SPRING_DATASOURCE_USERNAME: myapp
+      SPRING_DATASOURCE_PASSWORD: myapp
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: 1025
+    volumes:
+      - ./:/workspace
+      - maven_cache:/root/.m2
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: myapp
+      POSTGRES_USER: myapp
+      POSTGRES_PASSWORD: myapp
+    ports:
+      - "5432:5432"
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  maven_cache:
