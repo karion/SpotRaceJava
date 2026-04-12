@@ -2,7 +2,7 @@ package pl.net.karion.SpotRacer.common.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pl.net.karion.SpotRacer.user.exception.UserEmailTakenExceprion;
+import pl.net.karion.SpotRacer.user.exception.UserEmailTakenException;
 import pl.net.karion.SpotRacer.user.exception.UserMustHaveRoleException;
 import pl.net.karion.SpotRacer.user.exception.UserNotFoundException;
 
@@ -27,9 +27,9 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(ex.getMessage());
     }
 
-    @ExceptionHandler(UserEmailTakenExceprion.class)
+    @ExceptionHandler(UserEmailTakenException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleUserEmailTaken(UserEmailTakenExceprion ex) {
+    public ErrorResponse handleUserEmailTaken(UserEmailTakenException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 }

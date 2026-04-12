@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import pl.net.karion.SpotRacer.user.api.controller.CreateUserRequest;
 import pl.net.karion.SpotRacer.user.api.controller.UpdateUserRequest;
 import pl.net.karion.SpotRacer.user.api.controller.UserResponse;
-import pl.net.karion.SpotRacer.user.exception.UserEmailTakenExceprion;
+import pl.net.karion.SpotRacer.user.exception.UserEmailTakenException;
 import pl.net.karion.SpotRacer.user.exception.UserMustHaveRoleException;
 import pl.net.karion.SpotRacer.user.exception.UserNotFoundException;
 import pl.net.karion.SpotRacer.user.model.Role;
@@ -31,7 +31,7 @@ public class UserService {
     @Transactional
     public UserResponse create(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new UserEmailTakenExceprion();
+            throw new UserEmailTakenException();
         }
 
         User user = new User(
@@ -51,7 +51,7 @@ public class UserService {
         } catch (DataIntegrityViolationException ex) {
             if (ex.getCause() instanceof ConstraintViolationException cve) {
                 if ("uc_user_email".equals(cve.getConstraintName())) {
-                    throw new UserEmailTakenExceprion();
+                    throw new UserEmailTakenException();
                 }
             }
             throw ex;
