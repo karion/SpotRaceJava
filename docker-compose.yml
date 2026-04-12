@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/app/Dockerfile.dev
-    command: ./mvnw spring-boot:run
+    command: sh -c "sleep infinity"
     ports:
       - "8081:8081"
       - "5005:5005"
@@ -26,6 +26,8 @@ services:
       POSTGRES_PASSWORD: myapp
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   mailpit:
     image: axllent/mailpit:latest
@@ -35,3 +37,4 @@ services:
 
 volumes:
   maven_cache:
+  postgres_data:

@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-PROJECT_NAME := myapp
+PROJECT_NAME := spotracejava
 COMPOSE := docker compose
 APP_SERVICE := app
 DB_SERVICE := db
@@ -123,6 +123,10 @@ mvn-verify: ## Pełna walidacja projektu
 .PHONY: mvn-deps
 mvn-deps: ## Pobierz zależności Maven
 	$(COMPOSE) exec $(APP_SERVICE) ./mvnw dependency:resolve
+
+.PHONY: mvn-run
+mvn-run: ## Uruchamia spring-boot
+	$(COMPOSE) exec $(APP_SERVICE) ./mvnw spring-boot:run
 
 .PHONY: test
 test: mvn-test ## Alias na testy
