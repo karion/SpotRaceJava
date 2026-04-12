@@ -1,12 +1,10 @@
 package pl.net.karion.SpotRacer.user.api.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.*;
-import pl.net.karion.SpotRacer.user.model.Role;
-import pl.net.karion.SpotRacer.user.service.UserService;
-
-import java.util.List;
+import jakarta.validation.Valid;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.*;
+import pl.net.karion.SpotRacer.user.service.UserService;
 
 @Tag(name = "Users", description = "Operacje na użytkownikach")
 @RestController
@@ -22,16 +20,16 @@ public class RoleController {
     @PostMapping("/{id}/role")
     public UserResponse addRole(
             @PathVariable UUID id,
-            @RequestBody List<Role> roles
+            @Valid @RequestBody UpdateRolesRequest request
     ) {
-        return userService.addRole(id, roles);
+        return userService.addRole(id, request.roles());
     }
 
     @DeleteMapping("/{id}/role")
     public UserResponse removeRole(
             @PathVariable UUID id,
-            @RequestBody List<Role> roles
+            @Valid @RequestBody UpdateRolesRequest request
     ) {
-        return userService.removeRole(id, roles);
+        return userService.removeRole(id, request.roles());
     }
 }

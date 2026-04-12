@@ -1,14 +1,9 @@
 package pl.net.karion.SpotRacer.user.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.UuidGenerator;
-
-
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
 
 @Entity
 public class User {
@@ -30,7 +25,7 @@ public class User {
     )
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<Role>();
 
     protected User() {
         // wymagane przez JPA
@@ -79,7 +74,7 @@ public class User {
         return roles.contains(role);
     }
 
-    public List<Role> getRoles() {
-        return roles.stream().toList();
+    public Set<Role> getRoles() {
+        return roles;
     }
 }

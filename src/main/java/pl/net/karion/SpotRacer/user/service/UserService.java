@@ -16,8 +16,7 @@ import pl.net.karion.SpotRacer.user.model.User;
 import pl.net.karion.SpotRacer.user.model.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -88,7 +87,7 @@ public class UserService {
         return UserMapper.toResponse(savedUser);
     }
 
-    public UserResponse addRole(UUID id, List<Role> roles) {
+    public UserResponse addRole(UUID id, Set<Role> roles) {
         User user = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
 
@@ -99,7 +98,7 @@ public class UserService {
         return UserMapper.toResponse(savedUser);
     }
 
-    public UserResponse removeRole(UUID id, List<Role> roles) {
+    public UserResponse removeRole(UUID id, Set<Role> roles) {
         User user = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
 

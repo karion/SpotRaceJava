@@ -1,9 +1,8 @@
 package pl.net.karion.SpotRacer.user.api.controller;
 
 import pl.net.karion.SpotRacer.user.model.Role;
-import pl.net.karion.SpotRacer.user.model.User;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class UserResponse{
@@ -13,9 +12,9 @@ public class UserResponse{
     private final String firstname;
     private final String lastname;
 
-    private final List<Role> roles;
+    private final Set<Role> roles;
 
-    public UserResponse(UUID id, String email, String firstname, String lastname, List<Role> roles) {
+    public UserResponse(UUID id, String email, String firstname, String lastname, Set<Role> roles) {
         this.id = id;
         this.email = email;
         this.firstname = firstname;
@@ -39,7 +38,7 @@ public class UserResponse{
         return lastname;
     }
 
-    public List<Role> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 }
