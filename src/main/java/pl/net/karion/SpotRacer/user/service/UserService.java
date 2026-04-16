@@ -5,6 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.net.karion.SpotRacer.user.api.controller.CreateUserRequest;
 import pl.net.karion.SpotRacer.user.api.controller.UpdateUserRequest;
 import pl.net.karion.SpotRacer.user.api.controller.UserResponse;
@@ -23,9 +24,14 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
+    ) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -34,9 +40,11 @@ public class UserService {
             throw new UserEmailTakenException();
         }
 
+        String encodedPassword = this.passwordEncoder.encode(request.getPassword());
         User user = new User(
                 UUID.randomUUID(),
                 request.getEmail(),
+                encodedPassword,
                 request.getFirstname(),
                 request.getLastname()
         );
