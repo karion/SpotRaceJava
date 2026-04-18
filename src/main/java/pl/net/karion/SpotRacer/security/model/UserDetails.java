@@ -14,10 +14,10 @@ public class UserDetails implements org.springframework.security.core.userdetail
     private final UUID id;
     private String email;
     private String passwordHash;
-    private Set<Role> roles;
+    private List<Role> roles;
 
     public UserDetails(
-            UUID id, String email, String passwordHash, Set<Role> roles
+            UUID id, String email, String passwordHash, List<Role> roles
     ) {
         this.id = id;
         this.email = email;
@@ -33,7 +33,7 @@ public class UserDetails implements org.springframework.security.core.userdetail
         return passwordHash;
     }
 
-    public Set<Role> getRoles() {
+    public List<Role> getRoles() {
         return roles;
     }
 
