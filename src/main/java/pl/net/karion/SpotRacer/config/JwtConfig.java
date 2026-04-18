@@ -25,17 +25,6 @@ import java.util.Base64;
 public class JwtConfig {
 
     @Bean
-    SecretKey jwtSecretKey(@Value("${app.jwt.secret}") String secret) {
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        return new SecretKeySpec(keyBytes, "HmacSHA256");
-    }
-
-    @Bean
-    JwtDecoder jwtDecoder(SecretKey jwtSecretKey) {
-        return NimbusJwtDecoder.withSecretKey(jwtSecretKey).build();
-    }
-
-    @Bean
     RSAPrivateKey jwtPrivateKey(@Value("${app.jwt.private-key}") Resource resource) throws Exception {
         try (InputStream inputStream = resource.getInputStream()) {
             String pem = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
@@ -51,9 +40,7 @@ public class JwtConfig {
     }
 
     @Bean
-    RSAPublicKey jwtPublicKey(
-            @Value("${spring.security.oauth2.resourceserver.jwt.public-key-location}") Resource resource
-    ) throws Exception {
+    RSAPublicKey jwtPublicKey(@Value("${app.jwt.public-key}") Resource resource) throws Exception {
         try (InputStream inputStream = resource.getInputStream()) {
             String pem = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
             String content = pem
@@ -65,6 +52,11 @@ public class JwtConfig {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
             return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(keySpec);
         }
+    }
+
+    @Bean
+    JwtDecoder jwtDecoder(RSAPublicKey publicKey) {
+        return NimbusJwtDecoder.withPublicKey(publicKey).build();
     }
 
     @Bean
