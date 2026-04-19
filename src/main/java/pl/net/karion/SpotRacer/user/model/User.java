@@ -14,6 +14,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String passwordHash;
+
     private String firstname;
 
     private String lastname;
@@ -31,9 +34,10 @@ public class User {
         // wymagane przez JPA
     }
 
-    public User(UUID id, String email, String firstname, String lastname) {
+    public User(UUID id, String email, String passwordHash, String firstname, String lastname) {
         this.id = id;
         this.email = email;
+        this.passwordHash = passwordHash;
         this.firstname = firstname;
         this.lastname = lastname;
     }
@@ -46,12 +50,20 @@ public class User {
         return email;
     }
 
+    public String getPasswordHash() {
+        return this.passwordHash;
+    }
+
     public String getFirstname() {
         return firstname;
     }
 
     public String getLastname() {
         return lastname;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public void setFirstname(String firstname) {
