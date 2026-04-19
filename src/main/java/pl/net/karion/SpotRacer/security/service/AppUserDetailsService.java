@@ -1,6 +1,5 @@
 package pl.net.karion.SpotRacer.security.service;
 
-import java.util.List;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,7 +28,8 @@ public class AppUserDetailsService implements UserDetailsService {
                 user.getId(),
                 user.getEmail(),
                 user.getPasswordHash(),
-                List.copyOf(user.getRoles())
+                user.getRoles().stream()
+                        .toList()
         );
     }
 }
