@@ -1,2 +1,2 @@
-ALTER TABLE spotracer_user
-    ADD COLUMN passwordHash VARCHAR(255) NOT NULL DEFAULT 'temp_hash';
+ALTER TABLE sp_user
+    ADD COLUMN password_hash VARCHAR(255) NOT NULL DEFAULT 'temp_hash';
