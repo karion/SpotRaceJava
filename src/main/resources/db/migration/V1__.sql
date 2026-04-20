@@ -1,4 +1,4 @@
-CREATE TABLE spotracer_user
+CREATE TABLE sp_user
 (
     id        UUID         NOT NULL,
     email     VARCHAR(255) NOT NULL,
@@ -7,14 +7,14 @@ CREATE TABLE spotracer_user
     CONSTRAINT pk_user PRIMARY KEY (id)
 );
 
-CREATE TABLE spotracer_user_roles
+CREATE TABLE sp_user_roles
 (
     user_id UUID NOT NULL,
     role    VARCHAR(255)
 );
 
-ALTER TABLE spotracer_user
+ALTER TABLE sp_user
     ADD CONSTRAINT uc_user_email UNIQUE (email);
 
-ALTER TABLE spotracer_user_roles
-    ADD CONSTRAINT fk_user_roles_on_user FOREIGN KEY (user_id) REFERENCES spotracer_user (id);
+ALTER TABLE sp_user_roles
+    ADD CONSTRAINT fk_user_roles_on_user FOREIGN KEY (user_id) REFERENCES sp_user (id);
