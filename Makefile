@@ -124,9 +124,11 @@ mvn-verify: ## Pełna walidacja projektu
 mvn-deps: ## Pobierz zależności Maven
 	$(COMPOSE) exec $(APP_SERVICE) ./mvnw dependency:resolve
 
-.PHONY: mvn-run
+.PHONY: run mvn-run
 mvn-run: ## Uruchamia spring-boot
 	$(COMPOSE) exec $(APP_SERVICE) ./mvnw spring-boot:run
+
+run: mvn-run
 
 .PHONY: test
 test: mvn-test ## Alias na testy
