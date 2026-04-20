@@ -10,7 +10,7 @@ CREATE TABLE sp_spot
 (
     id          UUID         NOT NULL,
     name        VARCHAR(255) NOT NULL,
-    location_id UUID         NOT NULL,
+    location_id UUID,
     CONSTRAINT pk_sp_spot PRIMARY KEY (id)
 );
 

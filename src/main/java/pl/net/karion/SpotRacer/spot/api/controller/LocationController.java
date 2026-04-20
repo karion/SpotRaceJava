@@ -25,14 +25,14 @@ public class LocationController {
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping()
-    public LocationResponse create(LocationRequest request) {
+    public LocationResponse create(@Valid @RequestBody LocationRequest request) {
         return this.locationService.create(request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping(path = "/{id}")
-    public LocationResponse create(
+    public LocationResponse update(
             @PathVariable UUID id,
             @Valid @RequestBody LocationRequest request
     ) {

@@ -7,10 +7,10 @@ public class SpotMapper {
 
     public static SpotResponse toResponse(Spot  spot) {
         return new SpotResponse(
-                spot.getId(),
-                spot.getName(),
-                spot.getLocation().getId(),
-                spot.getLocation().getName()
+            spot.getId(),
+            spot.getName(),
+            spot.getLocation() != null ? spot.getLocation().getId() : null,
+            spot.getLocation() != null ? spot.getLocation().getName() : null
         );
     }
 }

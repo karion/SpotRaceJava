@@ -4,8 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import pl.net.karion.SpotRacer.spot.api.controller.LocationRequest;
-import pl.net.karion.SpotRacer.spot.api.controller.LocationResponse;
 import pl.net.karion.SpotRacer.spot.api.controller.SpotRequest;
 import pl.net.karion.SpotRacer.spot.api.controller.SpotResponse;
 import pl.net.karion.SpotRacer.spot.exception.LocationNotFoundException;
@@ -33,8 +31,10 @@ public class SpotService {
 
     public SpotResponse create(SpotRequest request) {
 
-        Location location = this.locationRepository.findById(request.locationID())
-                .orElse(null);
+        Location location = request.locationID() == null
+                ? null
+                : this.locationRepository.findById(request.locationID())
+                  .orElseThrow(LocationNotFoundException::new);
 
         Spot spot = new Spot(
                 UUID.randomUUID(),
@@ -50,8 +50,10 @@ public class SpotService {
         Spot spot = this.spotRepository.findById(id)
                 .orElseThrow(SpotNotFoundException::new);
 
-        Location location = this.locationRepository.findById(request.locationID())
-                .orElse(null);
+        Location location = request.locationID() == null
+                ? null
+                : this.locationRepository.findById(request.locationID())
+                  .orElseThrow(LocationNotFoundException::new);
 
         spot.setName(request.name());
         spot.setLocation(location);
@@ -66,7 +68,7 @@ public class SpotService {
         return SpotMapper.toResponse(spot);
     }
 
-    public Page<SpotResponse> getLocations(String search, Pageable pageable) {
+    public Page<SpotResponse> getSpots(String search, Pageable pageable) {
         Specification<Spot> spec = Specification
                 .where(SpotSpecifications.hasName(search));
 

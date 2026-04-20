@@ -1,6 +1,5 @@
 package pl.net.karion.SpotRacer.spot.api.controller;
 
-import com.sun.management.HotSpotDiagnosticMXBean;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,14 +25,14 @@ public class SpotController {
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping()
-    public SpotResponse create(SpotRequest request) {
+    public SpotResponse create(@Valid @RequestBody SpotRequest request) {
         return this.spotService.create(request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping(path = "/{id}")
-    public SpotResponse create(
+    public SpotResponse update(
             @PathVariable UUID id,
             @Valid @RequestBody SpotRequest request
     ) {
@@ -55,6 +54,6 @@ public class SpotController {
             @RequestParam(required = false) String search,
             Pageable pageable
     ) {
-        return this.spotService.getLocations(search, pageable);
+        return this.spotService.getSpots(search, pageable);
     }
 }
