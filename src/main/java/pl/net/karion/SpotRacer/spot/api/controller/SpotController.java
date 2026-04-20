@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequestMapping("/api/spot")
 public class SpotController {
 
-    private SpotService spotService;
+    private final SpotService spotService;
 
     public SpotController(SpotService spotService) {
         this.spotService = spotService;
@@ -24,7 +24,7 @@ public class SpotController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping()
+    @PostMapping
     public SpotResponse create(@Valid @RequestBody SpotRequest request) {
         return this.spotService.create(request);
     }
@@ -49,7 +49,7 @@ public class SpotController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping()
+    @GetMapping
     public Page<SpotResponse> getList(
             @RequestParam(required = false) String search,
             Pageable pageable

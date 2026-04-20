@@ -31,9 +31,9 @@ public class SpotService {
 
     public SpotResponse create(SpotRequest request) {
 
-        Location location = request.locationID() == null
+        Location location = request.locationId() == null
                 ? null
-                : this.locationRepository.findById(request.locationID())
+                : this.locationRepository.findById(request.locationId())
                   .orElseThrow(LocationNotFoundException::new);
 
         Spot spot = new Spot(
@@ -50,9 +50,9 @@ public class SpotService {
         Spot spot = this.spotRepository.findById(id)
                 .orElseThrow(SpotNotFoundException::new);
 
-        Location location = request.locationID() == null
+        Location location = request.locationId() == null
                 ? null
-                : this.locationRepository.findById(request.locationID())
+                : this.locationRepository.findById(request.locationId())
                   .orElseThrow(LocationNotFoundException::new);
 
         spot.setName(request.name());

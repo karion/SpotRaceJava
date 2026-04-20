@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequestMapping("/api/location")
 public class LocationController {
 
-    private LocationService locationService;
+    private final LocationService locationService;
 
     public LocationController(LocationService locationService) {
         this.locationService = locationService;
@@ -24,7 +24,7 @@ public class LocationController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping()
+    @PostMapping
     public LocationResponse create(@Valid @RequestBody LocationRequest request) {
         return this.locationService.create(request);
     }
@@ -49,7 +49,7 @@ public class LocationController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping()
+    @GetMapping
     public Page<LocationResponse> getList(
             @RequestParam(required = false) String search,
             Pageable pageable

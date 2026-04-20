@@ -14,7 +14,7 @@ public class Location {
     @Column(nullable = false)
     private String name;
 
-    @Column()
+    @Column
     private String description;
 
     public Location() {

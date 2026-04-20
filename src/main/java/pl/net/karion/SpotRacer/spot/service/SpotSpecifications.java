@@ -1,7 +1,6 @@
 package pl.net.karion.SpotRacer.spot.service;
 
 import org.springframework.data.jpa.domain.Specification;
-import pl.net.karion.SpotRacer.spot.model.Location;
 import pl.net.karion.SpotRacer.spot.model.Spot;
 
 public class SpotSpecifications {

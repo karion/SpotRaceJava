@@ -6,6 +6,6 @@ import java.util.UUID;
 
 public record SpotRequest(
         @NotBlank String name,
-        UUID locationID
+        UUID locationId
 ) {
 }

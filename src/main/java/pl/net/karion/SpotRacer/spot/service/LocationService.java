@@ -9,12 +9,6 @@ import pl.net.karion.SpotRacer.spot.api.controller.LocationResponse;
 import pl.net.karion.SpotRacer.spot.exception.LocationNotFoundException;
 import pl.net.karion.SpotRacer.spot.model.Location;
 import pl.net.karion.SpotRacer.spot.model.LocationRepository;
-import pl.net.karion.SpotRacer.user.api.controller.UserResponse;
-import pl.net.karion.SpotRacer.user.exception.UserNotFoundException;
-import pl.net.karion.SpotRacer.user.model.User;
-import pl.net.karion.SpotRacer.user.service.UserMapper;
-import pl.net.karion.SpotRacer.user.service.UserSpecifications;
-
 import java.util.UUID;
 
 @Service
