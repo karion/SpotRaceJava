@@ -35,10 +35,10 @@ public class UserFixture {
         return userRepository.save(user);
     }
 
-    public User createAdmin() {
+    public User createAdmin(String email) {
         User user = new User(
                 UUID.randomUUID(),
-                "admin@example.com",
+                email,
                 passwordEncoder.encode("password123"),
                 "Ada",
                 "Admin"
