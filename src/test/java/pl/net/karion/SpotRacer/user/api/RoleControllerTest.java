@@ -12,9 +12,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.hamcrest.Matchers.hasSize;
@@ -42,7 +40,7 @@ public class RoleControllerTest  extends IntegrationTest {
             }
         """;
 
-        mockMvc.perform(post("/api/user/{id}/role", saved.getId().toString())
+        mockMvc.perform(post("/api/user/{id}/role", saved.getId())
             .contentType(APPLICATION_JSON)
             .content(body)
             .with(user("admin").roles("ADMIN")))
@@ -71,7 +69,7 @@ public class RoleControllerTest  extends IntegrationTest {
             }
         """;
 
-        mockMvc.perform(post("/api/user/{id}/role", saved.getId().toString())
+        mockMvc.perform(post("/api/user/{id}/role", saved.getId())
                         .contentType(APPLICATION_JSON)
                         .content(body)
                         .with(user("admin").roles("ADMIN")))
@@ -100,7 +98,7 @@ public class RoleControllerTest  extends IntegrationTest {
             }
         """;
 
-        mockMvc.perform(post("/api/user/{id}/role", saved.getId().toString())
+        mockMvc.perform(post("/api/user/{id}/role", saved.getId())
                 .contentType(APPLICATION_JSON)
                 .content(body)
                 .with(user("user").roles("USER")))
@@ -123,7 +121,7 @@ public class RoleControllerTest  extends IntegrationTest {
             }
         """;
 
-        mockMvc.perform(delete("/api/user/{id}/role", saved.getId().toString())
+        mockMvc.perform(delete("/api/user/{id}/role", saved.getId())
                         .contentType(APPLICATION_JSON)
                         .content(body)
                         .with(user("admin").roles("ADMIN")))
@@ -152,7 +150,7 @@ public class RoleControllerTest  extends IntegrationTest {
             }
         """;
 
-        mockMvc.perform(delete("/api/user/{id}/role", saved.getId().toString())
+        mockMvc.perform(delete("/api/user/{id}/role", saved.getId())
                         .contentType(APPLICATION_JSON)
                         .content(body)
                         .with(user("admin").roles("ADMIN")))
@@ -176,11 +174,53 @@ public class RoleControllerTest  extends IntegrationTest {
             }
         """;
 
-        mockMvc.perform(delete("/api/user/{id}/role", saved.getId().toString())
+        mockMvc.perform(delete("/api/user/{id}/role", saved.getId())
             .contentType(APPLICATION_JSON)
             .content(body)
             .with(user("user").roles("USER")))
             .andExpect(status().isForbidden())
+        ;
+    }
+
+    @Test
+    void shouldFailAddingRolesToNotExistingUser() throws Exception {
+
+        UUID id =  UUID.randomUUID();
+
+        String body = """
+            {
+                "roles": [
+                    "ADMIN"
+                ]
+            }
+        """;
+
+        mockMvc.perform(post("/api/user/{id}/role", id)
+                        .contentType(APPLICATION_JSON)
+                        .content(body)
+                        .with(user("admin").roles("ADMIN")))
+                .andExpect(status().isNotFound())
+        ;
+    }
+
+    @Test
+    void shouldFailDeletingRolesToNotExistingUser() throws Exception {
+
+        UUID id =  UUID.randomUUID();
+
+        String body = """
+            {
+                "roles": [
+                    "ADMIN"
+                ]
+            }
+        """;
+
+        mockMvc.perform(delete("/api/user/{id}/role", id)
+                        .contentType(APPLICATION_JSON)
+                        .content(body)
+                        .with(user("admin").roles("ADMIN")))
+                .andExpect(status().isNotFound())
         ;
     }
 }

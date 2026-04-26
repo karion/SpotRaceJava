@@ -7,6 +7,8 @@ import pl.net.karion.SpotRacer.support.IntegrationTest;
 import pl.net.karion.SpotRacer.user.fixture.UserFixture;
 import pl.net.karion.SpotRacer.user.model.User;
 import java.util.UUID;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -82,6 +84,68 @@ class UserControllerTest extends IntegrationTest {
         mockMvc.perform(get("/api/user/{id}", id.toString())
                         .with(user("user").roles("USER")))
                 .andExpect(status().isForbidden())
+        ;
+    }
+
+    @Test
+    void shouldFailWhenCreateWithSameEmail() throws Exception {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String email = "pp-api-" + suffix + "@example.com";
+
+        User saved = userFixture.createUser(email, "Paulina", "Pobrana");
+
+        String body = """
+                {
+                  "email": "%s",
+                  "password": "secret123",
+                  "firstname": "John",
+                  "lastname": "Doe"
+                }
+                """.formatted(email);
+
+        mockMvc.perform(post("/api/user")
+                        .contentType(APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isConflict())
+        ;
+    }
+
+    @Test
+    void shouldFailOnIncorectData() throws Exception {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String email = "pp-api-" + suffix + "@example.com";
+
+        User saved = userFixture.createUser(email, "Paulina", "Pobrana");
+
+        String body = """
+                {
+                  "email": "%s",
+                  "firstname": "John",
+                  "lastname": "Doe"
+                }
+                """.formatted(email);
+
+        mockMvc.perform(post("/api/user")
+                        .contentType(APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+        ;
+    }
+
+    @Test
+    void shouldFindUserWithSearch() throws Exception {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String email = "pp-api-" + suffix + "@example.com";
+
+        User saved = userFixture.createUser(email, "Sara", "Szukana");
+
+
+        mockMvc.perform(get("/api/user?search=szukana")
+                        .contentType(APPLICATION_JSON)
+                        .with(user("admin").roles("ADMIN")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.numberOfElements", greaterThanOrEqualTo(1)))
+            .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
         ;
     }
 }
