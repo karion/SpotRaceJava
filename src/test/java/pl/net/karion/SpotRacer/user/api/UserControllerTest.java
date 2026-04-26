@@ -56,7 +56,7 @@ class UserControllerTest extends IntegrationTest {
 
         User saved = userFixture.createUser(email, "Paulina", "Pobrana");
 
-        mockMvc.perform(get("/api/user/{id}", saved.getId().toString())
+        mockMvc.perform(get("/api/user/{id}", saved.getId())
                 .with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(saved.getId().toString()))
@@ -111,11 +111,9 @@ class UserControllerTest extends IntegrationTest {
     }
 
     @Test
-    void shouldFailOnIncorectData() throws Exception {
+    void shouldFailOnIncorrectData() throws Exception {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         String email = "pp-api-" + suffix + "@example.com";
-
-        User saved = userFixture.createUser(email, "Paulina", "Pobrana");
 
         String body = """
                 {
@@ -145,7 +143,7 @@ class UserControllerTest extends IntegrationTest {
                         .with(user("admin").roles("ADMIN")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.numberOfElements", greaterThanOrEqualTo(1)))
-            .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
+            .andExpect(jsonPath("$.content.length()", greaterThanOrEqualTo(1)))
         ;
     }
 }

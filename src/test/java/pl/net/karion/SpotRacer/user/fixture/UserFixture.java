@@ -20,7 +20,9 @@ public class UserFixture {
     }
 
     public User createUser() {
-        return createUser("tine.test@example.com", "Tina", "Testówna");
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String email = "tine.test-" + suffix + "@example.com";
+        return createUser(email, "Tina", "Testówna");
     }
 
     public User createUser(String email, String firstname, String lastname) {
