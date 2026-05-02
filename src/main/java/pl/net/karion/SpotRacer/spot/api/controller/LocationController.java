@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.net.karion.SpotRacer.spot.service.LocationService;
@@ -25,6 +26,7 @@ public class LocationController {
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public LocationResponse create(@Valid @RequestBody LocationRequest request) {
         return this.locationService.create(request);
     }

@@ -2,6 +2,7 @@ package pl.net.karion.SpotRacer.common.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import pl.net.karion.SpotRacer.spot.exception.LocationNotFoundException;
 import pl.net.karion.SpotRacer.user.exception.UserEmailTakenException;
 import pl.net.karion.SpotRacer.user.exception.UserMustHaveRoleException;
 import pl.net.karion.SpotRacer.user.exception.UserNotFoundException;
@@ -18,6 +19,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleUserNotFound(UserNotFoundException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(LocationNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserNotFound(LocationNotFoundException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 
