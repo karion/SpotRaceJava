@@ -199,3 +199,7 @@ open-mail: ## Pokaż URL do Mailpit
 .PHONY: open-app
 open-app: ## Pokaż URL do aplikacji
 	@echo "Aplikacja: http://localhost:$(APP_PORT)"
+
+.PHONY: aa
+aa: ## Uruchom testy Maven w kontenerze app
+	$(COMPOSE) exec $(APP_SERVICE) ./mvnw -U test

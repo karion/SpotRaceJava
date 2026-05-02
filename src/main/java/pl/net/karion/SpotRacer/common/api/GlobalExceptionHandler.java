@@ -2,6 +2,8 @@ package pl.net.karion.SpotRacer.common.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import pl.net.karion.SpotRacer.spot.exception.LocationNotFoundException;
+import pl.net.karion.SpotRacer.spot.exception.SpotNotFoundException;
 import pl.net.karion.SpotRacer.user.exception.UserEmailTakenException;
 import pl.net.karion.SpotRacer.user.exception.UserMustHaveRoleException;
 import pl.net.karion.SpotRacer.user.exception.UserNotFoundException;
@@ -21,6 +23,12 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(ex.getMessage());
     }
 
+    @ExceptionHandler(LocationNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleUserNotFound(LocationNotFoundException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
     @ExceptionHandler(UserMustHaveRoleException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleUserMustHaveRole(UserMustHaveRoleException ex) {
@@ -30,6 +38,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserEmailTakenException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleUserEmailTaken(UserEmailTakenException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(SpotNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleSpotNotFound(SpotNotFoundException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 }
