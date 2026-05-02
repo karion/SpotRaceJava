@@ -70,7 +70,8 @@ public class SpotService {
 
     public Page<SpotResponse> getSpots(String search, Pageable pageable) {
         Specification<Spot> spec = Specification
-                .where(SpotSpecifications.hasName(search));
+            .where(SpotSpecifications.hasNameOrLocationName(search))
+        ;
 
         return this.spotRepository.findAll(spec, pageable)
                 .map(SpotMapper::toResponse);
