@@ -3,7 +3,6 @@ package pl.net.karion.SpotRacer.spot.fixtures;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.net.karion.SpotRacer.spot.model.Location;
-import pl.net.karion.SpotRacer.spot.model.LocationRepository;
 import pl.net.karion.SpotRacer.spot.model.Spot;
 import pl.net.karion.SpotRacer.spot.model.SpotRepository;
 
