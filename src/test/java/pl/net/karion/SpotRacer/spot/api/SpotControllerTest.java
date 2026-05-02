@@ -12,6 +12,7 @@ import pl.net.karion.SpotRacer.support.IntegrationTest;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -188,7 +189,7 @@ public class SpotControllerTest extends IntegrationTest {
     }
 
     @Test
-    void shouldReturnNoFoundOnUpdateOnRandomSpotId() throws Exception {
+    void shouldReturnNotFoundOnUpdateOnRandomSpotId() throws Exception {
 
         Location location = this.locationFixture.createLocation("New location");
         String body = this.createLocationBody("Updated spot", location);
@@ -204,7 +205,7 @@ public class SpotControllerTest extends IntegrationTest {
     }
 
     @Test
-    void shouldReturnNoFoundOnUpdateOnRandomLocation() throws Exception {
+    void shouldReturnNotFoundOnUpdateOnRandomLocation() throws Exception {
         Spot created = this.spotFixture.createSpot("Created spot for update", "Spotted location");
 
         String body = """
@@ -264,6 +265,7 @@ public class SpotControllerTest extends IntegrationTest {
 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.content[*].name").value(hasItem("Unique spot")))
         ;
     }
 
@@ -278,6 +280,7 @@ public class SpotControllerTest extends IntegrationTest {
 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.content[*].locationName").value(hasItem("a mysterious place")))
         ;
     }
 
