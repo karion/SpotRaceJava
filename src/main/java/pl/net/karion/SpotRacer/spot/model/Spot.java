@@ -18,7 +18,7 @@ public class Spot {
     @JoinColumn(name = "location_id")
     private Location location;
 
-    public Spot() {
+    protected Spot() {
     }
 
     public Spot(UUID id, String name, Location location) {
