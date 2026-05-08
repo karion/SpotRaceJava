@@ -74,8 +74,27 @@ public class AssignmentFixture {
                 user,
                 spot,
                 LocalDate.parse(startDate),
-                LocalDate.parse(endDate),
+                endDate != null ? LocalDate.parse(endDate) : null,
                 note
+        );
+
+        return this.assignmentRepository.save(assignment);
+    }
+
+    public Assignment createAssignment(
+        User user,
+        Spot spot,
+        String startDate,
+        String endDate,
+        String note
+    ) {
+        Assignment assignment = new Assignment(
+            UUID.randomUUID(),
+            user,
+            spot,
+            LocalDate.parse(startDate),
+            endDate != null ? LocalDate.parse(endDate): null,
+            note
         );
 
         return this.assignmentRepository.save(assignment);

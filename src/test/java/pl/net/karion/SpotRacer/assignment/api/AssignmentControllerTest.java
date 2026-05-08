@@ -1,6 +1,9 @@
 package pl.net.karion.SpotRacer.assignment.api;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -10,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.test.web.servlet.ResultMatcher;
 import pl.net.karion.SpotRacer.assignment.fixtures.AssignmentFixture;
 import pl.net.karion.SpotRacer.assignment.model.Assignment;
 import pl.net.karion.SpotRacer.spot.fixtures.SpotFixture;
@@ -19,6 +23,7 @@ import pl.net.karion.SpotRacer.user.fixture.UserFixture;
 import pl.net.karion.SpotRacer.user.model.User;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class AssignmentControllerTest  extends IntegrationTest {
 
@@ -35,8 +40,9 @@ public class AssignmentControllerTest  extends IntegrationTest {
     private MockMvc mockMvc;
 
 
+
     @Test
-    void createAssignment() throws Exception {
+    void shouldCreateAssignment() throws Exception {
 
         Spot spot = this.spotFixture.createSpot("Spot create assignment");
         User user = this.userFixture.createUser(
@@ -67,6 +73,188 @@ public class AssignmentControllerTest  extends IntegrationTest {
                 .andExpect(jsonPath("$.startDate").value("2030-01-01"))
                 .andExpect(jsonPath("$.endDate").value("2030-01-10"))
                 .andExpect(jsonPath("$.note").value("Test: AssignmentFixture.createAssignment"))
+        ;
+    }
+
+    @Test
+    void shouldThrowForbiddenOnUserWhenCreateAssignment() throws Exception {
+
+        String body = this.createBody(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "2030-01-01",
+                "2030-01-10",
+                "Test: AssignmentFixture.createAssignment"
+        );
+
+        mockMvc.perform(post("/api/assignment")
+                        .with(user("user").roles("USER"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                )
+
+                .andExpect(status().isForbidden())
+        ;
+    }
+
+    @Test
+    void shouldThrowUnauthorizedWhenCreateAssignmentWithoutUser() throws Exception {
+
+        String body = this.createBody(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "2030-01-01",
+                "2030-01-10",
+                "Test: AssignmentFixture.createAssignment"
+        );
+
+        mockMvc.perform(post("/api/assignment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                )
+
+                .andExpect(status().isUnauthorized())
+        ;
+    }
+
+    @Test
+    void shouldThrowsUserNotFoundWhenCreatingAssignmentWithRandomUserUuid() throws Exception {
+
+        String body = this.createBody(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "2030-01-01",
+                "2030-01-10",
+                "Test: AssignmentFixture.createAssignment"
+        );
+
+        mockMvc.perform(post("/api/assignment")
+                        .with(user("admin").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                )
+
+                .andExpect(status().isNotFound())
+        ;
+    }
+
+    @Test
+    void shouldThrowsSpotNotFoundWhenCreatingAssignmentWithRandomSpotUuid() throws Exception {
+
+        User user = this.userFixture.createUser();
+
+        String body = this.createBody(
+                user.getId(),
+                UUID.randomUUID(),
+                "2030-01-01",
+                "2030-01-10",
+                "Test: AssignmentFixture.createAssignment"
+        );
+
+        mockMvc.perform(post("/api/assignment")
+                        .with(user("admin").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                )
+
+                .andExpect(status().isNotFound())
+        ;
+    }
+
+    public static Stream<Arguments> overlapCases() {
+        return Stream.of(
+
+            // overlap
+            Arguments.of(
+                "2030-01-01",
+                "2030-01-10",
+                "2030-01-05",
+                null,
+                status().isConflict()
+            ),
+
+            Arguments.of(
+                "2030-01-01",
+                null,
+                "2030-01-05",
+                null,
+                status().isConflict()
+            ),
+
+            // touching boundary -> conflict
+            Arguments.of(
+                "2030-01-01",
+                "2030-01-10",
+                "2030-01-10",
+                "2030-01-15",
+                status().isConflict()
+            ),
+
+            // B+1 -> Created
+            Arguments.of(
+                "2030-01-01",
+                "2030-01-10",
+                "2030-01-11",
+                "2030-01-15",
+                status().isCreated()
+            ),
+
+            // A-5 A -> Conflict
+            Arguments.of(
+                "2030-01-10",
+                null,
+                "2030-01-01",
+                "2030-01-10",
+                status().isConflict()
+            ),
+
+            // A-5 A-1 -> Created
+            Arguments.of(
+                "2030-01-10",
+                null,
+                "2030-01-01",
+                "2030-01-09",
+                status().isCreated()
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("overlapCases")
+    void shouldDetectOverlap(
+        String existingStart,
+        String existingEnd,
+        String newStart,
+        String newEnd,
+        ResultMatcher expectedStatus
+    ) throws Exception {
+
+        User user = this.userFixture.createUser();
+        Spot spot = this.spotFixture.createSpot();
+
+        Assignment assignment = this.assignmentFixture.createAssignment(
+            user,
+            spot,
+            existingStart,
+            existingEnd,
+            "note"
+        );
+
+        String body = this.createBody(
+            user.getId(),
+            spot.getId(),
+            newStart,
+            newEnd,
+            "Test: AssignmentFixture.createAssignment"
+        );
+
+        mockMvc.perform(post("/api/assignment")
+                .with(user("admin").roles("ADMIN"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+            )
+
+            .andExpect(expectedStatus)
         ;
     }
 
@@ -121,20 +309,26 @@ public class AssignmentControllerTest  extends IntegrationTest {
     }
 
     private String createBody(UUID userId, UUID spotId, String startDate, String endDate, String note) {
-        return """
+        String body = """
         {
           "userId": "%s",
           "spotId": "%s",
-          "startDate": "%s",
-          "endDate": "%s",
-          "note": "%s"
+          "startDate": "%s"
+        """;
+
+        if (endDate != null) {
+            body += ",\"endDate\": \"" + endDate + "\"";
         }
-        """.formatted(
+
+        if (note != null) {
+            body += ",\"note\": \"" + note + "\"";
+        }
+        body += "}";
+
+        return body.formatted(
                 userId.toString(),
                 spotId.toString(),
-                startDate,
-                endDate,
-                note
+                startDate
         );
     }
 
