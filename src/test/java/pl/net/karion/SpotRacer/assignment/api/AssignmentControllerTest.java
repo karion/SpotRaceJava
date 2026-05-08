@@ -308,6 +308,71 @@ public class AssignmentControllerTest  extends IntegrationTest {
         ;
     }
 
+    @Test
+    void shouldDeleteAssignment() throws Exception {
+        Assignment assignment = this.assignmentFixture.createAssignment(
+                "Elilia",
+                "Znikla",
+                "U stolu",
+                "2030-01-01",
+                "2030-01-15",
+                "Note"
+        );
+
+        mockMvc.perform(delete("/api/assignment/{id}", assignment.getId())
+                .with(user("admin").roles("ADMIN"))
+            )
+            .andExpect(status().isNoContent())
+        ;
+    }
+
+    @Test
+    void shouldThrowNotFoundOnRandomUuidWhenDeleteAssignment() throws Exception {
+
+        mockMvc.perform(delete("/api/assignment/{id}", UUID.randomUUID())
+                        .with(user("admin").roles("ADMIN"))
+                )
+                .andExpect(status().isNotFound())
+        ;
+    }
+
+    @Test
+    void shouldThrowForbiddenWithUserWhenDeleteAssignment() throws Exception {
+
+        Assignment assignment = this.assignmentFixture.createAssignment(
+                "Elilia",
+                "Znikla",
+                "U stolu",
+                "2030-01-01",
+                "2030-01-15",
+                "Note"
+        );
+
+        mockMvc.perform(delete("/api/assignment/{id}", assignment.getId())
+                        .with(user("user").roles("USER"))
+                )
+                .andExpect(status().isForbidden())
+        ;
+    }
+
+    @Test
+    void shouldThrowUnauthorisedWithoutUserWhenDeleteAssignment() throws Exception {
+
+        Assignment assignment = this.assignmentFixture.createAssignment(
+                "Elilia",
+                "Znikla",
+                "U stolu",
+                "2030-01-01",
+                "2030-01-15",
+                "Note"
+        );
+
+        mockMvc.perform(delete("/api/assignment/{id}", assignment.getId())
+                )
+                .andExpect(status().isUnauthorized())
+        ;
+    }
+
     private String createBody(UUID userId, UUID spotId, String startDate, String endDate, String note) {
         String body = """
         {
