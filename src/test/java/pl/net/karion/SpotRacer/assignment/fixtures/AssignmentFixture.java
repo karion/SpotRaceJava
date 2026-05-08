@@ -29,20 +29,53 @@ public class AssignmentFixture {
     }
 
     public Assignment createAssignment() {
-        Spot spot = this.spotFixture.createSpot("Spot create assignment");
+        return this.createAssignment(
+                "Hania",
+                "Przypisówna",
+                "Spot create assignment",
+                "2030-01-01",
+                "2030-02-01",
+                "Test: AssignmentFixture.createAssignment"
+        );
+    }
+
+    public Assignment createAssignment(
+            String userFirstname,
+            String userLastname,
+            String spotName
+    ) {
+        return this.createAssignment(
+                userFirstname,
+                userLastname,
+                spotName,
+                "2030-01-01",
+                "2030-02-01",
+                "Test: AssignmentFixture.createAssignment"
+        );
+    }
+
+    public Assignment createAssignment(
+            String userFirstname,
+            String userLastname,
+            String spotName,
+            String startDate,
+            String endDate,
+            String note
+    ) {
+        Spot spot = this.spotFixture.createSpot(spotName);
         User user = this.userFixture.createUser(
                 UserFixture.randomEmail(),
-                "Hania",
-                "Przypisówna"
+                userFirstname,
+                userLastname
         );
 
         Assignment assignment = new Assignment(
                 UUID.randomUUID(),
                 user,
                 spot,
-                LocalDate.of(2030, 1, 1),
-                LocalDate.of(2030, 2, 1),
-                "Test: AssignmentFixture.createAssignment"
+                LocalDate.parse(startDate),
+                LocalDate.parse(endDate),
+                note
         );
 
         return this.assignmentRepository.save(assignment);

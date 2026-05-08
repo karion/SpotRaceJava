@@ -11,7 +11,7 @@ public class AssignmentMapper {
                 assignment.getSpot().getId(),
                 assignment.getSpot().getName(),
                 assignment.getUser().getId(),
-                assignment.getUser().getFirstname() + " " +assignment.getUser().getLastname(),
+                assignment.getUser().getFullname(),
                 assignment.getStartDate(),
                 assignment.getEndDate(),
                 assignment.getNote()

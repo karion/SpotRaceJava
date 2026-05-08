@@ -9,19 +9,22 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import pl.net.karion.SpotRacer.assignment.model.AssignmentRepository;
+
+import pl.net.karion.SpotRacer.assignment.fixtures.AssignmentFixture;
+import pl.net.karion.SpotRacer.assignment.model.Assignment;
 import pl.net.karion.SpotRacer.spot.fixtures.SpotFixture;
 import pl.net.karion.SpotRacer.spot.model.Spot;
 import pl.net.karion.SpotRacer.support.IntegrationTest;
 import pl.net.karion.SpotRacer.user.fixture.UserFixture;
 import pl.net.karion.SpotRacer.user.model.User;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 public class AssignmentControllerTest  extends IntegrationTest {
 
-//    private final AssignmentRepository assignmentRepository;
+    @Autowired
+    private AssignmentFixture assignmentFixture;
+
     @Autowired
     private UserFixture userFixture;
 
@@ -31,15 +34,6 @@ public class AssignmentControllerTest  extends IntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-//    public AssignmentControllerTest(
-////            AssignmentRepository assignmentRepository,
-//            UserFixture userFixture,
-//            SpotFixture spotFixture
-//    ) {
-////        this.assignmentRepository = assignmentRepository;
-//        this.userFixture = userFixture;
-//        this.spotFixture = spotFixture;
-//    }
 
     @Test
     void createAssignment() throws Exception {
@@ -73,6 +67,56 @@ public class AssignmentControllerTest  extends IntegrationTest {
                 .andExpect(jsonPath("$.startDate").value("2030-01-01"))
                 .andExpect(jsonPath("$.endDate").value("2030-01-10"))
                 .andExpect(jsonPath("$.note").value("Test: AssignmentFixture.createAssignment"))
+        ;
+    }
+
+    @Test
+    void shouldReturnAssignmentById() throws Exception {
+        Assignment assignment = this.assignmentFixture.createAssignment(
+                "Zenobia",
+                "Wyrywna",
+                "Za rogiem",
+                "2030-01-01",
+                "2030-01-15",
+                "Na wsze czasy"
+        );
+
+        mockMvc.perform(get("/api/assignment/{id}", assignment.getId())
+                .with(user("admin").roles("ADMIN"))
+            )
+
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.spotName").value("Za rogiem"))
+            .andExpect(jsonPath("$.userName").value("Zenobia Wyrywna"))
+            .andExpect(jsonPath("$.startDate").value("2030-01-01"))
+            .andExpect(jsonPath("$.endDate").value("2030-01-15"))
+            .andExpect(jsonPath("$.note").value("Na wsze czasy"))
+        ;
+    }
+
+    @Test
+    void shouldThrowNotFoundOnRandomUuidOnGetById() throws Exception {
+        mockMvc.perform(get("/api/assignment/{id}", UUID.randomUUID())
+                .with(user("admin").roles("ADMIN"))
+            )
+            .andExpect(status().isNotFound())
+        ;
+    }
+
+    @Test
+    void shouldThrowForbiddenOnGetById() throws Exception {
+        mockMvc.perform(get("/api/assignment/{id}", UUID.randomUUID())
+                .with(user("user").roles("USER"))
+            )
+            .andExpect(status().isForbidden())
+        ;
+    }
+
+    @Test
+    void shouldThrowUnauthorisedOnGetById() throws Exception {
+        mockMvc.perform(get("/api/assignment/{id}", UUID.randomUUID())
+            )
+            .andExpect(status().isUnauthorized())
         ;
     }
 

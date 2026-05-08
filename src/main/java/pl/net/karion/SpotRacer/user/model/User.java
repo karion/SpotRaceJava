@@ -92,4 +92,8 @@ public class User {
     public Set<Role> getRoles() {
         return Set.copyOf(roles);
     }
+
+    public String getFullname() {
+        return this.firstname + " " + this.lastname;
+    }
 }
