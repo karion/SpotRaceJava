@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 import pl.net.karion.SpotRacer.assignment.api.controller.AssignmentCreateRequest;
 import pl.net.karion.SpotRacer.assignment.api.controller.AssignmentResponse;
 import pl.net.karion.SpotRacer.assignment.api.controller.AssignmentUpdateRequest;
@@ -26,7 +27,6 @@ import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -123,11 +123,8 @@ public class AssignmentServiceTest {
         when(spotRepository.findById(spot.getId()))
                 .thenReturn(Optional.of(spot));
 
-        when(assignmentRepository.findOverlapping(
-                any(),
-                any(),
-                any(),
-                isNull()
+        when(assignmentRepository.findAll(
+                any(Specification.class)
         )).thenReturn(List.of());
 
         UUID assignmentId = UUID.randomUUID();
@@ -268,11 +265,8 @@ public class AssignmentServiceTest {
                 "just note"
         );
 
-        when(assignmentRepository.findOverlapping(
-                any(),
-                any(),
-                any(),
-                isNull()
+        when(assignmentRepository.findAll(
+                any(Specification.class)
         )).thenReturn(List.of(assignment));
 
         // when
@@ -319,11 +313,8 @@ public class AssignmentServiceTest {
         when(assignmentRepository.findById(assignmentId))
                 .thenReturn(Optional.of(assignment));
 
-        when(assignmentRepository.findOverlapping(
-                any(),
-                any(),
-                any(),
-                any()
+        when(assignmentRepository.findAll(
+                any(Specification.class)
         )).thenReturn(List.of());
 
         LocalDate startDate = LocalDate.of(2030, 1, 1);
@@ -386,11 +377,8 @@ public class AssignmentServiceTest {
         when(assignmentRepository.findById(assignmentId))
                 .thenReturn(Optional.of(assignment));
 
-        when(assignmentRepository.findOverlapping(
-                any(),
-                any(),
-                any(),
-                any()
+        when(assignmentRepository.findAll(
+                any(Specification.class)
         )).thenReturn(List.of(assignment));
 
         LocalDate startDate = LocalDate.of(2030, 1, 1);

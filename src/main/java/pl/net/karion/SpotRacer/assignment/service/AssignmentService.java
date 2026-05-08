@@ -66,11 +66,14 @@ public class AssignmentService {
     }
 
     private boolean canAssignSpot(UUID spotId, LocalDate startDate, LocalDate endDate, UUID assignmentId) {
-        List<Assignment> overlapped = this.assignmentRepository.findOverlapping(
+
+        List<Assignment> overlapped = assignmentRepository.findAll(
+            AssignmentSpecification.overlapping(
                 spotId,
                 startDate,
                 endDate,
                 assignmentId
+            )
         );
 
         return overlapped.isEmpty();

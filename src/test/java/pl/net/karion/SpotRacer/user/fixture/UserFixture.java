@@ -19,6 +19,10 @@ public class UserFixture {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public static String randomEmail() {
+        return "tine.test-" + UUID.randomUUID().toString().substring(0, 8) + "@example.com";
+    }
+
     public User createUser() {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         String email = "tine.test-" + suffix + "@example.com";
