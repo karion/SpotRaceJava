@@ -39,8 +39,6 @@ public class AssignmentControllerTest  extends IntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-
-
     @Test
     void shouldCreateAssignment() throws Exception {
 
@@ -309,6 +307,132 @@ public class AssignmentControllerTest  extends IntegrationTest {
     }
 
     @Test
+    void shouldUpdateAssignment() throws Exception {
+        Assignment assignment = this.assignmentFixture.createAssignment(
+                "Natalia",
+                "Nieaktualna",
+                "Na przystanku",
+                "2030-01-01",
+                "2030-01-15",
+                "Note"
+        );
+
+        String body = this.createUpdateBody(
+                "2030-01-01",
+                "2030-01-10",
+                "Bez 11-15"
+        );
+
+        mockMvc.perform(put("/api/assignment/{id}", assignment.getId())
+                    .with(user("admin").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.spotName").value("Na przystanku"))
+                .andExpect(jsonPath("$.userName").value("Natalia Nieaktualna"))
+                .andExpect(jsonPath("$.startDate").value("2030-01-01"))
+                .andExpect(jsonPath("$.endDate").value("2030-01-10"))
+                .andExpect(jsonPath("$.note").value("Bez 11-15"))
+        ;
+    }
+
+    public static Stream<Arguments> overlapCasesForUpdate() {
+        return Stream.of(
+            Arguments.of(
+                "2030-01-11",
+                "2030-01-20",
+                "2030-01-01",
+                "2030-01-10",
+                "2030-01-01",
+                "2030-01-11",
+                status().isConflict()
+            ),
+            Arguments.of(
+                "2030-01-11",
+                "2030-01-20",
+                "2030-01-01",
+                "2030-01-05",
+                "2030-01-01",
+                "2030-01-10",
+                status().isOk()
+            ),
+            Arguments.of(
+                "2030-01-11",
+                "2030-01-20",
+                "2030-01-21",
+                "2030-01-30",
+                "2030-01-20",
+                "2030-01-30",
+                status().isConflict()
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("overlapCasesForUpdate")
+    void shouldDetectsOverlapOnUpdate(
+            String existingStart,
+            String existingEnd,
+            String createdStart,
+            String createdEnd,
+            String updatedStart,
+            String updatedEnd,
+            ResultMatcher expectedStatus
+    ) throws Exception {
+        Assignment existingAssignment = this.assignmentFixture.createAssignment(
+                "Natalia",
+                "Nieaktualna",
+                "Na przystanku",
+                existingStart,
+                existingEnd,
+                "Existing Assignment"
+        );
+
+        User user = this.userFixture.createUser();
+
+        Assignment createdAssignment = this.assignmentFixture.createAssignment(
+                user,
+                existingAssignment.getSpot(),
+                createdStart,
+                createdEnd,
+                "Created Assignment"
+        );
+
+        String body = this.createUpdateBody(
+                updatedStart,
+                updatedEnd,
+                "Updated Assignment"
+        );
+
+        mockMvc.perform(put("/api/assignment/{id}", createdAssignment.getId())
+                        .with(user("admin").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                )
+                .andExpect(expectedStatus)
+                ;
+    }
+
+    @Test
+    void shouldThrowAssignmentNotFundOnUpdateWithRadomUuid() throws Exception {
+
+        String body = this.createUpdateBody(
+                "2030-01-01",
+                "2030-01-10",
+                "Bez 11-15"
+        );
+
+        mockMvc.perform(put("/api/assignment/{id}", UUID.randomUUID())
+                        .with(user("admin").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                )
+                .andExpect(status().isNotFound())
+        ;
+    }
+
+    @Test
     void shouldDeleteAssignment() throws Exception {
         Assignment assignment = this.assignmentFixture.createAssignment(
                 "Elilia",
@@ -394,6 +518,20 @@ public class AssignmentControllerTest  extends IntegrationTest {
                 userId.toString(),
                 spotId.toString(),
                 startDate
+        );
+    }
+
+    private String createUpdateBody(String startDate, String endDate, String note) {
+        return """
+        {
+          "startDate": "%s",
+          "endDate": "%s",
+          "note": "%s"
+        }
+        """.formatted(
+            startDate,
+            endDate,
+            note
         );
     }
 

@@ -44,7 +44,7 @@ public class AssignmentController {
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public AssignmentResponse create(@PathVariable UUID id, @Valid @RequestBody AssignmentUpdateRequest request) {
+    public AssignmentResponse update(@PathVariable UUID id, @Valid @RequestBody AssignmentUpdateRequest request) {
         return this.assignmentService.update(id, request);
     }
 
