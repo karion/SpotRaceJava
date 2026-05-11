@@ -11,8 +11,8 @@ import java.util.UUID;
 @Table(
         name = "sp_assignment",
         indexes = {
-                @Index(name = "idx_assignment_spot_start", columnList = "spot_id, startDate"),
-                @Index(name = "idx_assignment_spot_end", columnList = "spot_id, endDate")
+                @Index(name = "idx_assignment_spot_start", columnList = "spot_id, start_date"),
+                @Index(name = "idx_assignment_spot_end", columnList = "spot_id, end_date")
         }
 )
 public class Assignment {

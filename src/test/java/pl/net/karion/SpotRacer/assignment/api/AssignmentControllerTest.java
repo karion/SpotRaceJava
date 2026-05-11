@@ -415,7 +415,7 @@ public class AssignmentControllerTest  extends IntegrationTest {
     }
 
     @Test
-    void shouldThrowAssignmentNotFundOnUpdateWithRadomUuid() throws Exception {
+    void shouldThrowAssignmentNotFoundOnUpdateWithRandomUuid() throws Exception {
 
         String body = this.createUpdateBody(
                 "2030-01-01",

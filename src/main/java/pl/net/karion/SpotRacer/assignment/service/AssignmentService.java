@@ -87,6 +87,7 @@ public class AssignmentService {
         return this.spotRepository.findById(id).orElseThrow(SpotNotFoundException::new);
     }
 
+    @Transactional(readOnly = true)
     public AssignmentResponse getById(UUID id) {
         return AssignmentMapper.toResponse(
             this.assignmentRepository.findById(id)
