@@ -15,13 +15,11 @@ import pl.net.karion.SpotRacer.security.service.CurrentUserProvider;
 import pl.net.karion.SpotRacer.spot.exception.SpotNotFoundException;
 import pl.net.karion.SpotRacer.spot.model.Spot;
 import pl.net.karion.SpotRacer.spot.model.SpotRepository;
-import pl.net.karion.SpotRacer.user.exception.UserEmailTakenException;
 import pl.net.karion.SpotRacer.user.exception.UserNotFoundException;
 import pl.net.karion.SpotRacer.user.model.Role;
 import pl.net.karion.SpotRacer.user.model.User;
 import pl.net.karion.SpotRacer.user.model.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
-import pl.net.karion.SpotRacer.user.service.UserMapper;
 
 import java.util.UUID;
 
