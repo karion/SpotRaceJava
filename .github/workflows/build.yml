@@ -9,6 +9,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+
+        env:
+          POSTGRES_DB: myapp
+          POSTGRES_USER: myapp
+          POSTGRES_PASSWORD: myapp
+
+        ports:
+          - 5432:5432
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/myapp
+      SPRING_DATASOURCE_USERNAME: myapp
+      SPRING_DATASOURCE_PASSWORD: myapp
+
     steps:
       - uses: actions/checkout@v4
 
@@ -17,6 +40,13 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+      - name: Create JWT keys
+        run: |
+          mkdir -p src/main/resources/certs
+
+          echo "${{ secrets.JWT_PUBLIC_KEY }}" > src/main/resources/certs/public.pem
+
+          echo "${{ secrets.JWT_PRIVATE_KEY }}" > src/main/resources/certs/private.pem
 
       - name: Build
         run: ./mvnw verify

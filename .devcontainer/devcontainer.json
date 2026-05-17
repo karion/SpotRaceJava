@@ -17,7 +17,7 @@
 
   "forwardPorts": [8080],
 
-  "postCreateCommand": "./mvnw clean compile",
+  "postCreateCommand": "mkdir -p src/main/resources/certs && echo \"$JWT_PUBLIC_KEY\" > src/main/resources/certs/public.pem && echo \"$JWT_PRIVATE_KEY\" > src/main/resources/certs/private.pem && ./mvnw -q -DskipTests compile",
 
   "remoteUser": "vscode"
 }
