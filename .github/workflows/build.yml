@@ -17,6 +17,13 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+      - name: Create JWT keys
+        run: |
+          mkdir -p src/main/resources/certs
+
+          echo "${{ secrets.JWT_PUBLIC_KEY }}" > src/main/resources/certs/public.pem
+
+          echo "${{ secrets.JWT_PRIVATE_KEY }}" > src/main/resources/certs/private.pem
 
       - name: Build
         run: ./mvnw verify
