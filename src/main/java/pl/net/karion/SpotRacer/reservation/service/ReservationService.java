@@ -1,8 +1,10 @@
 package pl.net.karion.SpotRacer.reservation.service;
 
+import java.util.UUID;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.net.karion.SpotRacer.reservation.api.controller.ReservationRequest;
 import pl.net.karion.SpotRacer.reservation.api.controller.ReservationResponse;
 import pl.net.karion.SpotRacer.reservation.exception.ReservationAlreadyTakenException;
@@ -19,9 +21,6 @@ import pl.net.karion.SpotRacer.user.exception.UserNotFoundException;
 import pl.net.karion.SpotRacer.user.model.Role;
 import pl.net.karion.SpotRacer.user.model.User;
 import pl.net.karion.SpotRacer.user.model.UserRepository;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 public class ReservationService {
@@ -30,18 +29,20 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final SpotRepository spotRepository;
     private final CurrentUserProvider currentUserProvider;
+    private final ReservationAvailabilityService reservationAvailabilityService;
 
     public ReservationService(
         ReservationRepository reservationRepository,
         UserRepository userRepository,
         SpotRepository spotRepository,
-        CurrentUserProvider currentUserProvider
+        CurrentUserProvider currentUserProvider,
+        ReservationAvailabilityService reservationAvailabilityService
     ) {
         this.reservationRepository = reservationRepository;
-
         this.userRepository = userRepository;
         this.spotRepository = spotRepository;
         this.currentUserProvider = currentUserProvider;
+        this.reservationAvailabilityService = reservationAvailabilityService;
     }
 
     @Transactional
@@ -50,20 +51,11 @@ public class ReservationService {
         User user = this.userRepository.findById(request.userId())
                 .orElseThrow(UserNotFoundException::new);
 
-        CurrentUser currentUser = this.currentUserProvider.currentUser();
-        // test na uprawnienia
-        if (!user.getId().equals(currentUser.id())) {
-            if (currentUser.hasRole(Role.ADMIN)) {
-                throw new ReservationRequiresSelfOrAdminException();
-            }
-        }
-
         Spot spot = this.spotRepository.findById(request.spotId())
                 .orElseThrow(SpotNotFoundException::new);
 
-        if (this.reservationRepository.existsBySpotIdAndDate(spot.getId(), request.date())) {
-            throw new ReservationAlreadyTakenException();
-        }
+
+        this.reservationAvailabilityService.validateReservation(user, spot, request.date());
 
         Reservation reservation = new Reservation(
                 UUID.randomUUID(),
@@ -92,7 +84,7 @@ public class ReservationService {
         CurrentUser currentUser = this.currentUserProvider.currentUser();
         // test na uprawnienia
         if (!reservation.getUser().getId().equals(currentUser.id())) {
-            if (currentUser.hasRole(Role.ADMIN)) {
+            if (!currentUser.hasRole(Role.ADMIN)) {
                 throw new ReservationRequiresSelfOrAdminException();
             }
         }

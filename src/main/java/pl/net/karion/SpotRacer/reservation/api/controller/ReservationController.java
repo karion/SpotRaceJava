@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Tag(name = "Reservation", description = "Rezerwowanie miejsc postojowych")
 @RestController
-@RequestMapping("/api/reservarion")
+@RequestMapping("/api/reservation")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -30,7 +30,7 @@ public class ReservationController {
     @DeleteMapping(path = "/{id}")
     @SecurityRequirement(name = "bearerAuth")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(UUID id) {
+    public void delete(@PathVariable UUID id) {
         this.reservationService.delete(id);
     }
 }
