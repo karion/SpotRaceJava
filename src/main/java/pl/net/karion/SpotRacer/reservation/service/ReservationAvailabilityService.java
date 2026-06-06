@@ -4,10 +4,7 @@ import org.springframework.stereotype.Service;
 import pl.net.karion.SpotRacer.assignment.model.Assignment;
 import pl.net.karion.SpotRacer.assignment.model.AssignmentRepository;
 import pl.net.karion.SpotRacer.reservation.config.ReservationProperties;
-import pl.net.karion.SpotRacer.reservation.exception.ReservationAlreadyTakenException;
-import pl.net.karion.SpotRacer.reservation.exception.ReservationRequiresSelfOrAdminException;
-import pl.net.karion.SpotRacer.reservation.exception.ReservationToFarInFutureException;
-import pl.net.karion.SpotRacer.reservation.exception.ReservationWithAssignmentNotReleasedYetException;
+import pl.net.karion.SpotRacer.reservation.exception.*;
 import pl.net.karion.SpotRacer.reservation.model.ReservationRepository;
 import pl.net.karion.SpotRacer.security.model.CurrentUser;
 import pl.net.karion.SpotRacer.security.service.CurrentUserProvider;
@@ -63,7 +60,7 @@ public class ReservationAvailabilityService {
 
         if (assignment == null) {
             if (!this.isFromTodayToSomeDay(reservationDate, this.properties.standardWindowDays())) {
-                throw new ReservationToFarInFutureException();
+                throw new ReservationTooFarInFutureException();
             }
 
             return;
@@ -71,7 +68,7 @@ public class ReservationAvailabilityService {
 
         if (assignment.getUser().getId().equals(currentUser.id())) {
             if (!this.isFromTodayToSomeDay(reservationDate, this.properties.assignedWindowDays())) {
-                throw new ReservationToFarInFutureException();
+                throw new ReservationTooFarInFutureException();
             }
         } else {
             if (!this.isTodayAfterReleaseTime(reservationDate)) {
@@ -91,10 +88,10 @@ public class ReservationAvailabilityService {
         LocalDate today = LocalDate.now(clock);
 
         if (!reservationDate.isEqual(today)) {
-            throw new ReservationToFarInFutureException();
+            throw new ReservationTooFarInFutureException();
         }
 
         LocalTime now = LocalTime.now(clock);
-        return now.isAfter(this.properties.releaseAssignedSpotsAt());
+        return !now.isBefore(this.properties.releaseAssignedSpotsAt());
     }
 }

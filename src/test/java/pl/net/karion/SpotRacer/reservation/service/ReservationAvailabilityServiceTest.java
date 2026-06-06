@@ -15,10 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.net.karion.SpotRacer.assignment.model.Assignment;
 import pl.net.karion.SpotRacer.assignment.model.AssignmentRepository;
 import pl.net.karion.SpotRacer.reservation.config.ReservationProperties;
-import pl.net.karion.SpotRacer.reservation.exception.ReservationAlreadyTakenException;
-import pl.net.karion.SpotRacer.reservation.exception.ReservationRequiresSelfOrAdminException;
-import pl.net.karion.SpotRacer.reservation.exception.ReservationToFarInFutureException;
-import pl.net.karion.SpotRacer.reservation.exception.ReservationWithAssignmentNotReleasedYetException;
+import pl.net.karion.SpotRacer.reservation.exception.*;
 import pl.net.karion.SpotRacer.reservation.model.ReservationRepository;
 import pl.net.karion.SpotRacer.security.model.CurrentUser;
 import pl.net.karion.SpotRacer.security.service.CurrentUserProvider;
@@ -132,7 +129,7 @@ public class ReservationAvailabilityServiceTest {
                 Arguments.of(
                         "2026-05-24T10:00:00Z",
                         "2026-05-26",
-                        ReservationToFarInFutureException.class
+                        ReservationTooFarInFutureException.class
                 )
         );
     }
@@ -212,7 +209,7 @@ public class ReservationAvailabilityServiceTest {
             Arguments.of(
                     "2026-05-20T10:00:00Z",
                     "2026-05-28",
-                    ReservationToFarInFutureException.class
+                    ReservationTooFarInFutureException.class
             )
         );
     }
@@ -279,7 +276,7 @@ public class ReservationAvailabilityServiceTest {
     public static Stream<Arguments> dataForUserWithAssignmentForOtherUser() {
         return Stream.of(
                 Arguments.of(
-                        "2026-05-20T07:01:00Z",
+                        "2026-05-20T07:00:00Z",
                         "2026-05-20",
                         null
                 ),
@@ -289,7 +286,7 @@ public class ReservationAvailabilityServiceTest {
                         null
                 ),
                 Arguments.of(
-                        "2026-05-20T07:00:00Z",
+                        "2026-05-20T06:59:00Z",
                         "2026-05-20",
                         ReservationWithAssignmentNotReleasedYetException.class
                 )
@@ -413,7 +410,7 @@ public class ReservationAvailabilityServiceTest {
                 .thenReturn(Optional.of(assignment));
 
         assertThrows(
-            ReservationToFarInFutureException.class,
+            ReservationTooFarInFutureException.class,
             () -> reservationAvailabilityService.validateReservation(user, spot, reservationDate)
         );
     }
