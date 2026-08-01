@@ -18,6 +18,7 @@ import pl.net.karion.SpotRacer.spot.model.SpotRepository;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,13 +54,15 @@ public class CalendarService {
 
         List<CalendarDay> days = new ArrayList<>();
 
-        LocalDate today = LocalDate.now(clock);
-        LocalDate standardDateToExclusive = today.plusDays(reservationProperties.standardWindowDays());
-        LocalDate assignedDateToExclusive = today.plusDays(reservationProperties.assignedWindowDays());
+        ZonedDateTime now = ZonedDateTime.now(clock);
+
+        LocalDate today = now.toLocalDate();
+        LocalDate standardWindowEnd = today.plusDays(reservationProperties.standardWindowDays());
+        LocalDate assignedWindowEnd = today.plusDays(reservationProperties.assignedWindowDays());
 
         List<Assignment> assignments = this.assignmentRepository.findActiveAssignmentsBetween(
                 today,
-                assignedDateToExclusive
+                assignedWindowEnd
         );
 
         List<Assignment> userAssignments = assignments
@@ -81,7 +84,7 @@ public class CalendarService {
                 )
         );
 
-        List<Reservation> reservations = this.reservationRepository.findReservationsBetween(today, assignedDateToExclusive);
+        List<Reservation> reservations = this.reservationRepository.findReservationsBetween(today, assignedWindowEnd);
         Map<ReservationKey, Reservation> reservationsBySpotAndDate =
                 reservations.stream()
                         .collect(Collectors.toMap(
@@ -91,7 +94,7 @@ public class CalendarService {
                                 ),
                                 Function.identity()
                         ));
-        LocalDate rangeEnd = (isLongRange ? assignedDateToExclusive: standardDateToExclusive).plusDays(1);
+        LocalDate rangeEnd = (isLongRange ? assignedWindowEnd: standardWindowEnd).plusDays(1);
 
         today.datesUntil(rangeEnd)
             .forEach(date -> {
@@ -101,7 +104,8 @@ public class CalendarService {
                         reservationsBySpotAndDate,
                         assignmentsBySpotId,
                         userId,
-                        !date.isAfter(standardDateToExclusive)
+                        !date.isAfter(standardWindowEnd),
+                        now
                 );
                 days.add(day);
             });
@@ -115,7 +119,8 @@ public class CalendarService {
             Map<ReservationKey, Reservation> reservationsBySpotAndDate,
             Map<UUID, List<Assignment>> assignmentsBySpotId,
             UUID userId,
-            boolean isStandardWindow
+            boolean isStandardWindow,
+            ZonedDateTime now
     ) {
 
         List<CalendarDayAvailability> availabilities = new ArrayList<>();
@@ -136,7 +141,8 @@ public class CalendarService {
                         .findFirst()
                         .orElse(null),
                     userId,
-                    isStandardWindow
+                    isStandardWindow,
+                    now
             );
 
             CalendarDayAvailability availability = new CalendarDayAvailability(
@@ -162,7 +168,8 @@ public class CalendarService {
             Reservation reservation,
             Assignment assignment,
             UUID userId,
-            boolean forStandardWindow
+            boolean forStandardWindow,
+            ZonedDateTime now
     ) {
         if (reservation != null) {
             return reservation.getUser().getId().equals(userId) ?
@@ -173,10 +180,11 @@ public class CalendarService {
 
         // przypisanie
         if (assignment != null) {
-            LocalDate today = LocalDate.now(clock);
+
+            LocalDate today = now.toLocalDate();
             if (today.equals(date)) {
-                LocalTime now = LocalTime.now(clock);
-                if (now.isAfter(this.reservationProperties.releaseAssignedSpotsAt())) {
+                LocalTime currentTime = now.toLocalTime();
+                if (currentTime.isAfter(this.reservationProperties.releaseAssignedSpotsAt())) {
                     return SpotStatusEnum.FREE;
                 }
             }
