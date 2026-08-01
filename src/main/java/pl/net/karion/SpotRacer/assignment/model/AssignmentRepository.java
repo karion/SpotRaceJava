@@ -22,18 +22,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID>, J
 """)
     Optional<Assignment> findActiveAssignment(UUID spotId, LocalDate reservationDate);
 
-    @Query("""
-        select a
-        from Assignment a
-        where a.user.id = :userId
-          and a.startDate <= :dateTo
-          and (a.endDate is null or a.endDate >= :dateFrom)
-        """)
-    List<Assignment> findActiveForUserBetween(
-            UUID userId,
-            LocalDate dateFrom,
-            LocalDate dateTo
-    );
 
     @Query("""
     select a
@@ -41,5 +29,5 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID>, J
     where a.startDate <= :dateTo
           and (a.endDate is null or a.endDate >= :dateFrom)
 """)
-    List<Assignment> findActiveAssignmentForAllUser( LocalDate dateFrom, LocalDate dateTo);
+    List<Assignment> findActiveAssignmentsBetween(LocalDate dateFrom, LocalDate dateTo);
 }

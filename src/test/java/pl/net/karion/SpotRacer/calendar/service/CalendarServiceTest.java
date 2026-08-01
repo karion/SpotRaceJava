@@ -72,9 +72,9 @@ class CalendarServiceTest {
             when(reservationProperties.standardWindowDays()).thenReturn(1);
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 8, 8)
+                    LocalDate.of(2026, 8, 7)
             )).thenReturn(List.of());
 
             when(spotRepository.findAll(any(Sort.class)))
@@ -82,7 +82,7 @@ class CalendarServiceTest {
 
             when(reservationRepository.findReservationsBetween(
                     LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 8, 8)
+                    LocalDate.of(2026, 8, 7)
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
@@ -117,9 +117,9 @@ class CalendarServiceTest {
                 null
             );
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                 LocalDate.of(2026, 7, 31),
-                LocalDate.of(2026, 8, 8)
+                LocalDate.of(2026, 8, 7)
             )).thenReturn(List.of(assignment));
 
             when(spotRepository.findAll(any(Sort.class)))
@@ -127,7 +127,7 @@ class CalendarServiceTest {
 
             when(reservationRepository.findReservationsBetween(
                 LocalDate.of(2026, 7, 31),
-                LocalDate.of(2026, 8, 8)
+                LocalDate.of(2026, 8, 7)
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
@@ -154,7 +154,7 @@ class CalendarServiceTest {
             when(reservationProperties.standardWindowDays()).thenReturn(1);
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of());
@@ -169,9 +169,9 @@ class CalendarServiceTest {
 
             calendarService.getCalendar(userId);
 
-            verify(assignmentRepository).findActiveAssignmentForAllUser(
+            verify(assignmentRepository).findActiveAssignmentsBetween(
                     LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 8, 8)
+                    LocalDate.of(2026, 8, 7)
             );
         }
 
@@ -182,7 +182,7 @@ class CalendarServiceTest {
             when(reservationProperties.standardWindowDays()).thenReturn(1);
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of());
@@ -199,7 +199,7 @@ class CalendarServiceTest {
 
             verify(reservationRepository).findReservationsBetween(
                     LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 8, 8)
+                    LocalDate.of(2026, 8, 7)
             );
         }
 
@@ -210,7 +210,7 @@ class CalendarServiceTest {
             when(reservationProperties.standardWindowDays()).thenReturn(1);
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of());
@@ -246,7 +246,7 @@ class CalendarServiceTest {
             when(reservationProperties.standardWindowDays()).thenReturn(1);
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of());
@@ -273,7 +273,7 @@ class CalendarServiceTest {
             when(reservationProperties.standardWindowDays()).thenReturn(1);
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of());
@@ -291,52 +291,6 @@ class CalendarServiceTest {
             assertThat(response.days()).hasSize(2);
             assertThat(response.days().getLast().date())
                     .isEqualTo(LocalDate.of(2026, 8, 1));
-        }
-
-        @Test
-        void shouldReturnDatesUpToAssignedWindowWhenUserHasAssignments() {
-            User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
-            );
-
-            UUID userId = user.getId();
-
-            when(reservationProperties.standardWindowDays()).thenReturn(1);
-            when(reservationProperties.assignedWindowDays()).thenReturn(7);
-
-            Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
-
-            Assignment assignment = new Assignment(
-                    UUID.randomUUID(),
-                    user,
-                    spot,
-                    LocalDate.of(2026, 7, 30),
-                    null,
-                    null
-            );
-
-            when(assignmentRepository.findActiveAssignmentForAllUser(
-                    any(),
-                    any()
-            )).thenReturn(List.of(assignment));
-
-            when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of());
-
-            when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
-            )).thenReturn(List.of());
-
-            CalendarResponse response = calendarService.getCalendar(userId);
-
-            assertThat(response.days()).hasSize(8);
-            assertThat(response.days().getLast().date())
-                    .isEqualTo(LocalDate.of(2026, 8, 7));
         }
     }
 
@@ -360,7 +314,7 @@ class CalendarServiceTest {
 
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of());
@@ -411,7 +365,7 @@ class CalendarServiceTest {
 
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of());
@@ -463,7 +417,7 @@ class CalendarServiceTest {
                     null
             );
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of(assignment));
@@ -522,7 +476,7 @@ class CalendarServiceTest {
                     null
             );
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of(assignment));
@@ -578,7 +532,7 @@ class CalendarServiceTest {
                     null
             );
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of(assignment));
@@ -634,7 +588,7 @@ class CalendarServiceTest {
                     null
             );
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of(assignment));
@@ -688,7 +642,7 @@ class CalendarServiceTest {
                     null
             );
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of(assignment));
@@ -706,6 +660,8 @@ class CalendarServiceTest {
             assertThat(response.days()).hasSize(2);
             assertThat(response.days().getFirst().availabilities().getFirst().status().name())
                     .isEqualTo(SpotStatusEnum.FREE.name());
+            assertThat(response.days().get(1).availabilities().getFirst().status().name())
+                    .isEqualTo(SpotStatusEnum.ASSIGNED_TO_OTHER.name());
         }
 
         @Test
@@ -742,7 +698,7 @@ class CalendarServiceTest {
                     null
             );
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of(assignment));
@@ -795,7 +751,7 @@ class CalendarServiceTest {
                     null
             );
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of(assignment));
@@ -844,7 +800,7 @@ class CalendarServiceTest {
                     null
             );
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of(assignment));
@@ -887,7 +843,7 @@ class CalendarServiceTest {
 
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
-            when(assignmentRepository.findActiveAssignmentForAllUser(
+            when(assignmentRepository.findActiveAssignmentsBetween(
                     any(),
                     any()
             )).thenReturn(List.of());

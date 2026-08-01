@@ -54,10 +54,10 @@ public class CalendarService {
         List<CalendarDay> days = new ArrayList<>();
 
         LocalDate today = LocalDate.now(clock);
-        LocalDate standardDateToExclusive = today.plusDays(reservationProperties.standardWindowDays() + 1);
-        LocalDate assignedDateToExclusive = today.plusDays(reservationProperties.assignedWindowDays() + 1);
+        LocalDate standardDateToExclusive = today.plusDays(reservationProperties.standardWindowDays());
+        LocalDate assignedDateToExclusive = today.plusDays(reservationProperties.assignedWindowDays());
 
-        List<Assignment> assignments = this.assignmentRepository.findActiveAssignmentForAllUser(
+        List<Assignment> assignments = this.assignmentRepository.findActiveAssignmentsBetween(
                 today,
                 assignedDateToExclusive
         );
@@ -91,8 +91,9 @@ public class CalendarService {
                                 ),
                                 Function.identity()
                         ));
+        LocalDate rangeEnd = (isLongRange ? assignedDateToExclusive: standardDateToExclusive).plusDays(1);
 
-        today.datesUntil(isLongRange ? assignedDateToExclusive: standardDateToExclusive)
+        today.datesUntil(rangeEnd)
             .forEach(date -> {
                 CalendarDay day = this.createDay(
                         date,
@@ -100,7 +101,7 @@ public class CalendarService {
                         reservationsBySpotAndDate,
                         assignmentsBySpotId,
                         userId,
-                        date.isBefore(standardDateToExclusive)
+                        !date.isAfter(standardDateToExclusive)
                 );
                 days.add(day);
             });

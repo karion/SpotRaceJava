@@ -7,4 +7,7 @@ public record CalendarDay(
         LocalDate date,
         List<CalendarDayAvailability> availabilities
 ) {
+    public CalendarDay {
+        availabilities = List.copyOf(availabilities);
+    }
 }
