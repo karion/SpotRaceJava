@@ -1,6 +1,7 @@
 package pl.net.karion.SpotRacer.assignment.model;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,25 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID>, J
         )
 """)
     Optional<Assignment> findActiveAssignment(UUID spotId, LocalDate reservationDate);
+
+    @Query("""
+        select a
+        from Assignment a
+        where a.user.id = :userId
+          and a.startDate <= :dateTo
+          and (a.endDate is null or a.endDate >= :dateFrom)
+        """)
+    List<Assignment> findActiveForUserBetween(
+            UUID userId,
+            LocalDate dateFrom,
+            LocalDate dateTo
+    );
+
+    @Query("""
+    select a
+    from Assignment a
+    where a.startDate <= :dateTo
+          and (a.endDate is null or a.endDate >= :dateFrom)
+""")
+    List<Assignment> findActiveAssignmentForAllUser( LocalDate dateFrom, LocalDate dateTo);
 }
