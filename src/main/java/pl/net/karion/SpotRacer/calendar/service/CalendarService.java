@@ -37,11 +37,11 @@ public class CalendarService {
 
 
     public CalendarService(
-            SpotRepository spotRepository,
-            AssignmentRepository assignmentRepository,
-            ReservationRepository reservationRepository,
-            Clock clock,
-            ReservationProperties reservationProperties
+        SpotRepository spotRepository,
+        AssignmentRepository assignmentRepository,
+        ReservationRepository reservationRepository,
+        Clock clock,
+        ReservationProperties reservationProperties
     ) {
         this.spotRepository = spotRepository;
         this.assignmentRepository = assignmentRepository;
@@ -61,51 +61,51 @@ public class CalendarService {
         LocalDate assignedWindowEnd = today.plusDays(reservationProperties.assignedWindowDays());
 
         List<Assignment> assignments = this.assignmentRepository.findActiveAssignmentsBetween(
-                today,
-                assignedWindowEnd
+            today,
+            assignedWindowEnd
         );
 
         List<Assignment> userAssignments = assignments
-                .stream()
-                .filter(assignment -> assignment.getUser().getId().equals(userId))
-                .toList();
+            .stream()
+            .filter(assignment -> assignment.getUser().getId().equals(userId))
+            .toList();
 
         boolean isLongRange = !userAssignments.isEmpty();
 
         Map<UUID, List<Assignment>> assignmentsBySpotId = assignments.stream()
-                .collect(Collectors.groupingBy(
-                        assignment -> assignment.getSpot().getId()
-                ));
+            .collect(Collectors.groupingBy(
+                    assignment -> assignment.getSpot().getId()
+            ));
 
         List<Spot> spots = this.spotRepository.findAll(
-                Sort.by(
-                    Sort.Order.asc("location.name").nullsLast(),
-                    Sort.Order.asc("name").nullsLast()
-                )
+            Sort.by(
+                Sort.Order.asc("location.name").nullsLast(),
+                Sort.Order.asc("name").nullsLast()
+            )
         );
 
         List<Reservation> reservations = this.reservationRepository.findReservationsBetween(today, assignedWindowEnd);
         Map<ReservationKey, Reservation> reservationsBySpotAndDate =
-                reservations.stream()
-                        .collect(Collectors.toMap(
-                                reservation -> new ReservationKey(
-                                        reservation.getSpot().getId(),
-                                        reservation.getDate()
-                                ),
-                                Function.identity()
-                        ));
+            reservations.stream()
+                .collect(Collectors.toMap(
+                    reservation -> new ReservationKey(
+                        reservation.getSpot().getId(),
+                        reservation.getDate()
+                    ),
+                    Function.identity()
+                ));
         LocalDate rangeEnd = (isLongRange ? assignedWindowEnd: standardWindowEnd).plusDays(1);
 
         today.datesUntil(rangeEnd)
             .forEach(date -> {
                 CalendarDay day = this.createDay(
-                        date,
-                        spots,
-                        reservationsBySpotAndDate,
-                        assignmentsBySpotId,
-                        userId,
-                        !date.isAfter(standardWindowEnd),
-                        now
+                    date,
+                    spots,
+                    reservationsBySpotAndDate,
+                    assignmentsBySpotId,
+                    userId,
+                    !date.isAfter(standardWindowEnd),
+                    now
                 );
                 days.add(day);
             });
@@ -114,13 +114,13 @@ public class CalendarService {
     }
 
     private CalendarDay createDay(
-            LocalDate date,
-            List<Spot> spots,
-            Map<ReservationKey, Reservation> reservationsBySpotAndDate,
-            Map<UUID, List<Assignment>> assignmentsBySpotId,
-            UUID userId,
-            boolean isStandardWindow,
-            ZonedDateTime now
+        LocalDate date,
+        List<Spot> spots,
+        Map<ReservationKey, Reservation> reservationsBySpotAndDate,
+        Map<UUID, List<Assignment>> assignmentsBySpotId,
+        UUID userId,
+        boolean isStandardWindow,
+        ZonedDateTime now
     ) {
 
         List<CalendarDayAvailability> availabilities = new ArrayList<>();
@@ -133,43 +133,43 @@ public class CalendarService {
                 );
 
             SpotStatusEnum status = resolveStatus(
-                    date,
-                    reservationsBySpotAndDate.get(new ReservationKey(spot.getId(), date)),
-                    spotAssignments
-                        .stream()
-                        .filter( a -> a.isForThisDate(date))
-                        .findFirst()
-                        .orElse(null),
-                    userId,
-                    isStandardWindow,
-                    now
+                date,
+                reservationsBySpotAndDate.get(new ReservationKey(spot.getId(), date)),
+                spotAssignments
+                    .stream()
+                    .filter( a -> a.isForThisDate(date))
+                    .findFirst()
+                    .orElse(null),
+                userId,
+                isStandardWindow,
+                now
             );
 
             CalendarDayAvailability availability = new CalendarDayAvailability(
-                    date,
-                    spot.getId(),
-                    spot.getName(),
-                    spot.getLocation() != null ? spot.getLocation().getId() : null,
-                    spot.getLocation() != null ? spot.getLocation().getName() : null,
-                    status
+                date,
+                spot.getId(),
+                spot.getName(),
+                spot.getLocation() != null ? spot.getLocation().getId() : null,
+                spot.getLocation() != null ? spot.getLocation().getName() : null,
+                status
             );
 
             availabilities.add(availability);
         }
 
         return new CalendarDay(
-                date,
-                availabilities
+            date,
+            availabilities
         );
     }
 
     private SpotStatusEnum resolveStatus(
-            LocalDate date,
-            Reservation reservation,
-            Assignment assignment,
-            UUID userId,
-            boolean forStandardWindow,
-            ZonedDateTime now
+        LocalDate date,
+        Reservation reservation,
+        Assignment assignment,
+        UUID userId,
+        boolean forStandardWindow,
+        ZonedDateTime now
     ) {
         if (reservation != null) {
             return reservation.getUser().getId().equals(userId) ?
@@ -178,13 +178,11 @@ public class CalendarService {
             ;
         }
 
-        // przypisanie
         if (assignment != null) {
-
             LocalDate today = now.toLocalDate();
             if (today.equals(date)) {
                 LocalTime currentTime = now.toLocalTime();
-                if (currentTime.isAfter(this.reservationProperties.releaseAssignedSpotsAt())) {
+                if (!currentTime.isBefore(this.reservationProperties.releaseAssignedSpotsAt())) {
                     return SpotStatusEnum.FREE;
                 }
             }
@@ -195,7 +193,6 @@ public class CalendarService {
             ;
         }
 
-        // brak rezerwacji i przypisania miejsca - wolne
         return forStandardWindow ?
             SpotStatusEnum.FREE:
             SpotStatusEnum.NOT_OPEN_YET;

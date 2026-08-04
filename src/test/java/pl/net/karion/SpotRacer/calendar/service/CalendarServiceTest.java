@@ -47,11 +47,17 @@ class CalendarServiceTest {
 
     private CalendarService calendarService;
 
+    private static final ZoneId APP_ZONE = ZoneId.of("Europe/Warsaw");
+
     @BeforeEach
     void setUp() {
         Clock clock = Clock.fixed(
-                Instant.parse("2026-07-31T10:00:00Z"),
-                ZoneId.of("Europe/Warsaw")
+                ZonedDateTime.of(
+                        2026, 7, 31,
+                        12, 0, 0, 0,
+                        APP_ZONE
+                ).toInstant(),
+                APP_ZONE
         );
 
         calendarService = new CalendarService(
@@ -463,7 +469,7 @@ class CalendarServiceTest {
 
             when(reservationProperties.standardWindowDays()).thenReturn(1);
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
-            when(reservationProperties.releaseAssignedSpotsAt()).thenReturn(LocalTime.parse("12:00"));
+            when(reservationProperties.releaseAssignedSpotsAt()).thenReturn(LocalTime.parse("12:01"));
 
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
@@ -519,7 +525,7 @@ class CalendarServiceTest {
 
             when(reservationProperties.standardWindowDays()).thenReturn(1);
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
-            when(reservationProperties.releaseAssignedSpotsAt()).thenReturn(LocalTime.parse("12:00"));
+            when(reservationProperties.releaseAssignedSpotsAt()).thenReturn(LocalTime.parse("12:01"));
 
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
@@ -685,7 +691,7 @@ class CalendarServiceTest {
 
             when(reservationProperties.standardWindowDays()).thenReturn(1);
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
-            when(reservationProperties.releaseAssignedSpotsAt()).thenReturn(LocalTime.parse("12:00"));
+            when(reservationProperties.releaseAssignedSpotsAt()).thenReturn(LocalTime.parse("12:01"));
 
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
@@ -738,7 +744,7 @@ class CalendarServiceTest {
 
             when(reservationProperties.standardWindowDays()).thenReturn(1);
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
-            when(reservationProperties.releaseAssignedSpotsAt()).thenReturn(LocalTime.parse("12:00"));
+            when(reservationProperties.releaseAssignedSpotsAt()).thenReturn(LocalTime.parse("12:01"));
 
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
