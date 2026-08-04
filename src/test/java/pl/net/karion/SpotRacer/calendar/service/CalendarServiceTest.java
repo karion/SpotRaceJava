@@ -52,22 +52,23 @@ class CalendarServiceTest {
     @BeforeEach
     void setUp() {
         Clock clock = Clock.fixed(
-                ZonedDateTime.of(
-                        2026, 7, 31,
-                        12, 0, 0, 0,
-                        APP_ZONE
-                ).toInstant(),
+            ZonedDateTime.of(
+                2026, 7, 31,
+                12, 0, 0, 0,
                 APP_ZONE
+            ).toInstant(),
+            APP_ZONE
         );
 
         calendarService = new CalendarService(
-                spotRepository,
-                assignmentRepository,
-                reservationRepository,
-                clock,
-                reservationProperties
+            spotRepository,
+            assignmentRepository,
+            reservationRepository,
+            clock,
+            reservationProperties
         );
     }
+
     @Nested
     class GetCalendar {
 
@@ -79,23 +80,23 @@ class CalendarServiceTest {
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 8, 7)
+                LocalDate.of(2026, 7, 31),
+                LocalDate.of(2026, 8, 7)
             )).thenReturn(List.of());
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of());
+                .thenReturn(List.of());
 
             when(reservationRepository.findReservationsBetween(
-                    LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 8, 7)
+                LocalDate.of(2026, 7, 31),
+                LocalDate.of(2026, 8, 7)
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(2);
             assertThat(response.days())
-                    .allSatisfy(day -> assertThat(day.availabilities()).isEmpty());
+                .allSatisfy(day -> assertThat(day.availabilities()).isEmpty());
         }
 
         @Test
@@ -161,23 +162,23 @@ class CalendarServiceTest {
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of());
+                .thenReturn(List.of());
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             calendarService.getCalendar(userId);
 
             verify(assignmentRepository).findActiveAssignmentsBetween(
-                    LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 8, 7)
+                LocalDate.of(2026, 7, 31),
+                LocalDate.of(2026, 8, 7)
             );
         }
 
@@ -189,23 +190,23 @@ class CalendarServiceTest {
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of());
+                .thenReturn(List.of());
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             calendarService.getCalendar(userId);
 
             verify(reservationRepository).findReservationsBetween(
-                    LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 8, 7)
+                LocalDate.of(2026, 7, 31),
+                LocalDate.of(2026, 8, 7)
             );
         }
 
@@ -217,16 +218,16 @@ class CalendarServiceTest {
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of());
+                .thenReturn(List.of());
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             calendarService.getCalendar(userId);
@@ -253,23 +254,23 @@ class CalendarServiceTest {
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of());
+                .thenReturn(List.of());
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(2);
             assertThat(response.days().getFirst().date())
-                    .isEqualTo(LocalDate.of(2026, 7, 31));
+                .isEqualTo(LocalDate.of(2026, 7, 31));
         }
 
         @Test
@@ -280,23 +281,23 @@ class CalendarServiceTest {
             when(reservationProperties.assignedWindowDays()).thenReturn(7);
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of());
+                .thenReturn(List.of());
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(2);
             assertThat(response.days().getLast().date())
-                    .isEqualTo(LocalDate.of(2026, 8, 1));
+                .isEqualTo(LocalDate.of(2026, 8, 1));
         }
     }
 
@@ -306,11 +307,11 @@ class CalendarServiceTest {
         @Test
         void shouldMarkSpotAsReservedToYouWhenReservationBelongsToCurrentUser() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
@@ -321,49 +322,49 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             Reservation reservation = new Reservation(
-                    UUID.randomUUID(),
-                    user,
-                    spot,
-                    LocalDate.of(2026, 7, 31)
+                UUID.randomUUID(),
+                user,
+                spot,
+                LocalDate.of(2026, 7, 31)
             );
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(reservation));
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(2);
             assertThat(response.days().getFirst().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.RESERVED_TO_YOU.name());
+                .isEqualTo(SpotStatusEnum.RESERVED_TO_YOU.name());
         }
 
         @Test
         void shouldMarkSpotAsReservedWhenReservationBelongsToOtherUser() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
 
             User otherUser = new User(
-                    UUID.randomUUID(),
-                    "other.user@email.com",
-                    "",
-                    "Oliwia",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "other.user@email.com",
+                "",
+                "Oliwia",
+                "Kowalski"
             );
 
             when(reservationProperties.standardWindowDays()).thenReturn(1);
@@ -372,39 +373,39 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             Reservation reservation = new Reservation(
-                    UUID.randomUUID(),
-                    otherUser,
-                    spot,
-                    LocalDate.of(2026, 7, 31)
+                UUID.randomUUID(),
+                otherUser,
+                spot,
+                LocalDate.of(2026, 7, 31)
             );
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(reservation));
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(2);
             assertThat(response.days().getFirst().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.RESERVED.name());
+                .isEqualTo(SpotStatusEnum.RESERVED.name());
         }
 
         @Test
         void shouldPreferReservationOverAssignment() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
@@ -415,40 +416,40 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             Assignment assignment = new Assignment(
-                    UUID.randomUUID(),
-                    user,
-                    spot,
-                    LocalDate.of(2026, 7, 31),
-                    null,
-                    null
+                UUID.randomUUID(),
+                user,
+                spot,
+                LocalDate.of(2026, 7, 31),
+                null,
+                null
             );
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(assignment));
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             Reservation reservation = new Reservation(
-                    UUID.randomUUID(),
-                    user,
-                    spot,
-                    LocalDate.of(2026, 7, 31)
+                UUID.randomUUID(),
+                user,
+                spot,
+                LocalDate.of(2026, 7, 31)
             );
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(reservation));
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(8);
             assertThat(response.days().getFirst().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.RESERVED_TO_YOU.name());
+                .isEqualTo(SpotStatusEnum.RESERVED_TO_YOU.name());
             assertThat(response.days().getLast().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.ASSIGNED_TO_YOU.name());
+                .isEqualTo(SpotStatusEnum.ASSIGNED_TO_YOU.name());
         }
     }
 
@@ -458,11 +459,11 @@ class CalendarServiceTest {
         @Test
         void shouldMarkSpotAsAssignedToYouWhenAssignmentBelongsToCurrentUser() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
@@ -474,51 +475,51 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             Assignment assignment = new Assignment(
-                    UUID.randomUUID(),
-                    user,
-                    spot,
-                    LocalDate.of(2026, 7, 31),
-                    null,
-                    null
+                UUID.randomUUID(),
+                user,
+                spot,
+                LocalDate.of(2026, 7, 31),
+                null,
+                null
             );
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(assignment));
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(8);
             assertThat(response.days().getFirst().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.ASSIGNED_TO_YOU.name());
+                .isEqualTo(SpotStatusEnum.ASSIGNED_TO_YOU.name());
             assertThat(response.days().getLast().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.ASSIGNED_TO_YOU.name());
+                .isEqualTo(SpotStatusEnum.ASSIGNED_TO_YOU.name());
         }
 
         @Test
         void shouldMarkSpotAsAssignedToOtherWhenAssignmentBelongsToOtherUser() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
             User otherUser = new User(
-                    UUID.randomUUID(),
-                    "other.user@email.com",
-                    "",
-                    "Olga",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "other.user@email.com",
+                "",
+                "Olga",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
@@ -530,51 +531,51 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             Assignment assignment = new Assignment(
-                    UUID.randomUUID(),
-                    otherUser,
-                    spot,
-                    LocalDate.of(2026, 7, 31),
-                    null,
-                    null
+                UUID.randomUUID(),
+                otherUser,
+                spot,
+                LocalDate.of(2026, 7, 31),
+                null,
+                null
             );
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(assignment));
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(2);
             assertThat(response.days().getFirst().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.ASSIGNED_TO_OTHER.name());
+                .isEqualTo(SpotStatusEnum.ASSIGNED_TO_OTHER.name());
             assertThat(response.days().getLast().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.ASSIGNED_TO_OTHER.name());
+                .isEqualTo(SpotStatusEnum.ASSIGNED_TO_OTHER.name());
         }
 
         @Test
         void shouldMarkAssignedSpotAsFreeWhenTodayAndReleaseTimeHasPassed() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
             User otherUser = new User(
-                    UUID.randomUUID(),
-                    "other.user@email.com",
-                    "",
-                    "Olga",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "other.user@email.com",
+                "",
+                "Olga",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
@@ -586,49 +587,49 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             Assignment assignment = new Assignment(
-                    UUID.randomUUID(),
-                    otherUser,
-                    spot,
-                    LocalDate.of(2026, 7, 31),
-                    null,
-                    null
+                UUID.randomUUID(),
+                otherUser,
+                spot,
+                LocalDate.of(2026, 7, 31),
+                null,
+                null
             );
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(assignment));
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(2);
             assertThat(response.days().getFirst().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.FREE.name());
+                .isEqualTo(SpotStatusEnum.FREE.name());
         }
 
         @Test
         void shouldNotReleaseAssignedSpotForFutureDateEvenWhenReleaseTimeHasPassed() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
             User otherUser = new User(
-                    UUID.randomUUID(),
-                    "other.user@email.com",
-                    "",
-                    "Olga",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "other.user@email.com",
+                "",
+                "Olga",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
@@ -640,51 +641,51 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             Assignment assignment = new Assignment(
-                    UUID.randomUUID(),
-                    otherUser,
-                    spot,
-                    LocalDate.of(2026, 7, 31),
-                    null,
-                    null
+                UUID.randomUUID(),
+                otherUser,
+                spot,
+                LocalDate.of(2026, 7, 31),
+                null,
+                null
             );
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(assignment));
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(2);
             assertThat(response.days().getFirst().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.FREE.name());
+                .isEqualTo(SpotStatusEnum.FREE.name());
             assertThat(response.days().get(1).availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.ASSIGNED_TO_OTHER.name());
+                .isEqualTo(SpotStatusEnum.ASSIGNED_TO_OTHER.name());
         }
 
         @Test
         void shouldUseAssignmentOnlyWhenItIsActiveForDate() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
             User otherUser = new User(
-                    UUID.randomUUID(),
-                    "other.user@email.com",
-                    "",
-                    "Olga",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "other.user@email.com",
+                "",
+                "Olga",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
@@ -696,34 +697,34 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             Assignment assignment = new Assignment(
-                    UUID.randomUUID(),
-                    otherUser,
-                    spot,
-                    LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 7, 31),
-                    null
+                UUID.randomUUID(),
+                otherUser,
+                spot,
+                LocalDate.of(2026, 7, 31),
+                LocalDate.of(2026, 7, 31),
+                null
             );
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(assignment));
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(2);
             assertThat(response.days().getFirst().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.ASSIGNED_TO_OTHER.name());
+                .isEqualTo(SpotStatusEnum.ASSIGNED_TO_OTHER.name());
             assertThat(response.days().getLast().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.FREE.name());
+                .isEqualTo(SpotStatusEnum.FREE.name());
         }
     }
 
@@ -733,11 +734,11 @@ class CalendarServiceTest {
         @Test
         void shouldMarkSpotAsFreeWhenNoReservationAndNoAssignmentInStandardWindow() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
@@ -749,44 +750,44 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             Assignment assignment = new Assignment(
-                    UUID.randomUUID(),
-                    user,
-                    spot,
-                    LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 7, 31),
-                    null
+                UUID.randomUUID(),
+                user,
+                spot,
+                LocalDate.of(2026, 7, 31),
+                LocalDate.of(2026, 7, 31),
+                null
             );
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(assignment));
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSize(8);
             assertThat(response.days().getFirst().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.ASSIGNED_TO_YOU.name());
+                .isEqualTo(SpotStatusEnum.ASSIGNED_TO_YOU.name());
             assertThat(response.days().getLast().availabilities().getFirst().status().name())
-                    .isEqualTo(SpotStatusEnum.NOT_OPEN_YET.name());
+                .isEqualTo(SpotStatusEnum.NOT_OPEN_YET.name());
         }
 
         @Test
         void shouldMarkSpotAsNotOpenYetWhenNoReservationAndNoAssignmentOutsideStandardWindow() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
@@ -798,34 +799,34 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             Assignment assignment = new Assignment(
-                    UUID.randomUUID(),
-                    user,
-                    spot,
-                    LocalDate.of(2026, 7, 31),
-                    LocalDate.of(2026, 7, 31),
-                    null
+                UUID.randomUUID(),
+                user,
+                spot,
+                LocalDate.of(2026, 7, 31),
+                LocalDate.of(2026, 7, 31),
+                null
             );
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of(assignment));
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);
 
             assertThat(response.days()).hasSizeGreaterThanOrEqualTo(8);
             assertThat(response.days().subList(2, 8))
-                    .allSatisfy(day -> assertThat(day.availabilities())
-                            .allSatisfy(availability -> assertThat(availability.status())
-                                    .isEqualTo(SpotStatusEnum.NOT_OPEN_YET)));
+                .allSatisfy(day -> assertThat(day.availabilities())
+                    .allSatisfy(availability -> assertThat(availability.status())
+                        .isEqualTo(SpotStatusEnum.NOT_OPEN_YET)));
         }
     }
 
@@ -835,11 +836,11 @@ class CalendarServiceTest {
         @Test
         void shouldHandleSpotWithoutAssignments() {
             User user = new User(
-                    UUID.randomUUID(),
-                    "random@email.com",
-                    "",
-                    "Jan",
-                    "Kowalski"
+                UUID.randomUUID(),
+                "random@email.com",
+                "",
+                "Jan",
+                "Kowalski"
             );
 
             UUID userId = user.getId();
@@ -850,16 +851,16 @@ class CalendarServiceTest {
             Spot spot = new Spot(UUID.randomUUID(), "Spot1", null);
 
             when(assignmentRepository.findActiveAssignmentsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             when(spotRepository.findAll(any(Sort.class)))
-                    .thenReturn(List.of(spot));
+                .thenReturn(List.of(spot));
 
             when(reservationRepository.findReservationsBetween(
-                    any(),
-                    any()
+                any(),
+                any()
             )).thenReturn(List.of());
 
             CalendarResponse response = calendarService.getCalendar(userId);

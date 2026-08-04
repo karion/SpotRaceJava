@@ -74,7 +74,7 @@ public class CalendarService {
 
         Map<UUID, List<Assignment>> assignmentsBySpotId = assignments.stream()
             .collect(Collectors.groupingBy(
-                    assignment -> assignment.getSpot().getId()
+                assignment -> assignment.getSpot().getId()
             ));
 
         List<Spot> spots = this.spotRepository.findAll(
@@ -94,7 +94,7 @@ public class CalendarService {
                     ),
                     Function.identity()
                 ));
-        LocalDate rangeEnd = (isLongRange ? assignedWindowEnd: standardWindowEnd).plusDays(1);
+        LocalDate rangeEnd = (isLongRange ? assignedWindowEnd : standardWindowEnd).plusDays(1);
 
         today.datesUntil(rangeEnd)
             .forEach(date -> {
@@ -137,7 +137,7 @@ public class CalendarService {
                 reservationsBySpotAndDate.get(new ReservationKey(spot.getId(), date)),
                 spotAssignments
                     .stream()
-                    .filter( a -> a.isForThisDate(date))
+                    .filter(a -> a.isForThisDate(date))
                     .findFirst()
                     .orElse(null),
                 userId,
@@ -175,7 +175,7 @@ public class CalendarService {
             return reservation.getUser().getId().equals(userId) ?
                 SpotStatusEnum.RESERVED_TO_YOU :
                 SpotStatusEnum.RESERVED
-            ;
+                ;
         }
 
         if (assignment != null) {
@@ -187,14 +187,14 @@ public class CalendarService {
                 }
             }
 
-            return assignment.getUser().getId().equals(userId)?
-                SpotStatusEnum.ASSIGNED_TO_YOU:
+            return assignment.getUser().getId().equals(userId) ?
+                SpotStatusEnum.ASSIGNED_TO_YOU :
                 SpotStatusEnum.ASSIGNED_TO_OTHER
-            ;
+                ;
         }
 
         return forStandardWindow ?
-            SpotStatusEnum.FREE:
+            SpotStatusEnum.FREE :
             SpotStatusEnum.NOT_OPEN_YET;
     }
 }
