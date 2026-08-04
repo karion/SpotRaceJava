@@ -202,4 +202,4 @@ open-app: ## Pokaż URL do aplikacji
 
 .PHONY: aa
 aa: ## Uruchom testy Maven w kontenerze app
-	$(COMPOSE) exec $(APP_SERVICE) ./mvnw -U test -Dtest=ReservationAvailabilityServiceTest
+	$(COMPOSE) exec $(APP_SERVICE) ./mvnw -U test -Dtest=CalendarServiceTest

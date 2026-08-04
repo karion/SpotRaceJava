@@ -92,4 +92,14 @@ public class Assignment {
     public void setNote(String note) {
         this.note = note;
     }
+
+    public boolean isForThisDate(LocalDate date) {
+        if (this.startDate.isAfter(date)) {
+            return false;
+        }
+        if (this.endDate != null && this.endDate.isBefore(date)) {
+            return false;
+        }
+        return true;
+    }
 }
