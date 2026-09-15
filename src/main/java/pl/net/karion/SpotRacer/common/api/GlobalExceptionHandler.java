@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.net.karion.SpotRacer.assignment.exception.AssignmentNotFoundException;
 import pl.net.karion.SpotRacer.assignment.exception.AssignmentStartDateCannotBeMovedBackException;
 import pl.net.karion.SpotRacer.assignment.exception.SpotAlreadyAssignedException;
-import pl.net.karion.SpotRacer.reservation.exception.ReservationRequiresSelfOrAdminException;
+import pl.net.karion.SpotRacer.reservation.exception.*;
 import pl.net.karion.SpotRacer.spot.exception.LocationNotFoundException;
 import pl.net.karion.SpotRacer.spot.exception.SpotNotFoundException;
 import pl.net.karion.SpotRacer.user.exception.UserEmailTakenException;
@@ -74,4 +74,30 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleReservationRequiresSelfOrAdminException(ReservationRequiresSelfOrAdminException ex) {
         return new ErrorResponse(ex.getMessage());
     }
+
+    @ExceptionHandler(ReservationAlreadyTakenException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleReservationAlreadyTakenException(ReservationAlreadyTakenException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(ReservationNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleReservationNotFoundException(ReservationNotFoundException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(ReservationTooFarInFutureException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleReservationTooFarInFutureException(ReservationTooFarInFutureException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(ReservationWithAssignmentNotReleasedYetException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleReservationWithAssignmentNotReleasedYetException(ReservationWithAssignmentNotReleasedYetException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+
 }

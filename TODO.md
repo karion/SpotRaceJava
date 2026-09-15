@@ -31,7 +31,7 @@ Numery linii wskazują stan kodu podczas przeglądu i mogą się zmieniać.
 
 ### 2. Obsługa wyjątków rezerwacji przez API
 
-- [ ] **Problem w kodzie.** Ustalić i wdrożyć odpowiedzi HTTP dla wyjątków modułu `reservation`.
+- [x] **Problem w kodzie.** Ustalić i wdrożyć odpowiedzi HTTP dla wyjątków modułu `reservation`.
 - **Punkt startowy:** [GlobalExceptionHandler.java](src/main/java/pl/net/karion/SpotRacer/common/api/GlobalExceptionHandler.java), linia 15; [wyjątki rezerwacji](src/main/java/pl/net/karion/SpotRacer/reservation/exception).
 - **Scenariusz i skutek:** zajęte miejsce, brak rezerwacji lub próba usunięcia cudzej rezerwacji powodują wyjątki `RuntimeException`, których obecny handler nie obsługuje. Oczekiwane odmowy biznesowe nie mają zdefiniowanej odpowiedzi API i mogą skończyć się 500.
 - **Pierwszy krok:** rozpisać tabelę wyjątek → status → komunikat. Punkty wyjścia: 404 dla braku rezerwacji, 403 dla braku uprawnień, 409 dla zajętego miejsca; ustalić kontrakt dla ograniczeń czasowych.
