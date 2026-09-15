@@ -22,7 +22,7 @@ Numery linii wskazują stan kodu podczas przeglądu i mogą się zmieniać.
 
 ### 1. Odczyt zalogowanego użytkownika przy żądaniach JWT
 
-- [ ] **Problem w kodzie.** Sprawdzić i dopasować `CurrentUserProvider` do uwierzytelniania Bearer JWT.
+- [X] **Problem w kodzie.** Sprawdzić i dopasować `CurrentUserProvider` do uwierzytelniania Bearer JWT.
 - **Punkt startowy:** [SpringSecurityCurrentUserProvider.java](src/main/java/pl/net/karion/SpotRacer/security/service/SpringSecurityCurrentUserProvider.java), linia 21; [SecurityConfig.java](src/main/java/pl/net/karion/SpotRacer/config/SecurityConfig.java), linia 63.
 - **Scenariusz i skutek:** provider rzutuje principal na własne `UserDetails`, podczas gdy skonfigurowany konwerter JWT nie tworzy takiego obiektu. Żądanie kalendarza lub rezerwacji z tokenem trafia na niezgodny typ zamiast odczytać użytkownika.
 - **Pierwszy krok:** prześledzić typ principal osobno podczas logowania i podczas kolejnego żądania z tokenem.

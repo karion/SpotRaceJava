@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.net.karion.SpotRacer.assignment.exception.AssignmentNotFoundException;
 import pl.net.karion.SpotRacer.assignment.exception.AssignmentStartDateCannotBeMovedBackException;
 import pl.net.karion.SpotRacer.assignment.exception.SpotAlreadyAssignedException;
+import pl.net.karion.SpotRacer.reservation.exception.ReservationRequiresSelfOrAdminException;
 import pl.net.karion.SpotRacer.spot.exception.LocationNotFoundException;
 import pl.net.karion.SpotRacer.spot.exception.SpotNotFoundException;
 import pl.net.karion.SpotRacer.user.exception.UserEmailTakenException;
@@ -65,6 +66,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AssignmentStartDateCannotBeMovedBackException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleAssignmentNotFound(AssignmentStartDateCannotBeMovedBackException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(ReservationRequiresSelfOrAdminException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleReservationRequiresSelfOrAdminException(ReservationRequiresSelfOrAdminException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 }
