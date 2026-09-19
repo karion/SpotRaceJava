@@ -257,6 +257,32 @@ public class AssignmentControllerTest  extends IntegrationTest {
     }
 
     @Test
+    void shouldReturnBadRequestWhenStartingDateIsNull() throws Exception {
+        Spot spot = this.spotFixture.createSpot("Spot create assignment");
+        User user = this.userFixture.createUser(
+            UserFixture.randomEmail(),
+            "Hania",
+            "Przypisówna"
+        );
+
+        String body = this.createBody(
+            user.getId(),
+            spot.getId(),
+            null,
+            "2030-01-10",
+            "Test: createAssignment without start date"
+        );
+
+        mockMvc.perform(post("/api/assignment")
+            .with(user("admin").roles("ADMIN"))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body)
+        )
+            .andExpect(status().isBadRequest())
+        ;
+    }
+
+    @Test
     void shouldReturnAssignmentById() throws Exception {
         Assignment assignment = this.assignmentFixture.createAssignment(
                 "Zenobia",
@@ -432,6 +458,42 @@ public class AssignmentControllerTest  extends IntegrationTest {
         ;
     }
 
+
+    @Test
+    void shouldReturnBadRequestWhenUpdateStartingDateToNull() throws Exception {
+        Spot spot = this.spotFixture.createSpot("Spot create assignment");
+        User user = this.userFixture.createUser(
+            UserFixture.randomEmail(),
+            "Hania",
+            "Przypisówna"
+        );
+
+        Assignment createdAssignment = this.assignmentFixture.createAssignment(
+            user,
+            spot,
+            "2030-01-01",
+            "2030-01-10",
+            "Created Assignment"
+        );
+
+        String body = this.createBody(
+            user.getId(),
+            spot.getId(),
+            null,
+            "2030-01-10",
+            "Test: createAssignment without start date"
+        );
+
+        mockMvc.perform(put("/api/assignment/{id}", createdAssignment.getId())
+                .with(user("admin").roles("ADMIN"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+            )
+            .andExpect(status().isBadRequest())
+        ;
+    }
+
+
     @Test
     void shouldDeleteAssignment() throws Exception {
         Assignment assignment = this.assignmentFixture.createAssignment(
@@ -502,7 +564,7 @@ public class AssignmentControllerTest  extends IntegrationTest {
         {
           "userId": "%s",
           "spotId": "%s",
-          "startDate": "%s"
+          "startDate": %s
         """;
 
         if (endDate != null) {
@@ -517,19 +579,19 @@ public class AssignmentControllerTest  extends IntegrationTest {
         return body.formatted(
                 userId.toString(),
                 spotId.toString(),
-                startDate
+                startDate == null ? null : "\"%s\"".formatted(startDate)
         );
     }
 
     private String createUpdateBody(String startDate, String endDate, String note) {
         return """
         {
-          "startDate": "%s",
+          "startDate": %s,
           "endDate": "%s",
           "note": "%s"
         }
         """.formatted(
-            startDate,
+            startDate == null ? null : "\"%s\"".formatted(startDate),
             endDate,
             note
         );
