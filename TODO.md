@@ -40,7 +40,7 @@ Numery linii wskazują stan kodu podczas przeglądu i mogą się zmieniać.
 
 ### 3. Walidacja przydziału przy brakującej dacie początku
 
-- [ ] **Problem w kodzie.** Zapewnić bezpieczną walidację obu DTO przydziału przy niepełnych danych.
+- [x] **Problem w kodzie.** Zapewnić bezpieczną walidację obu DTO przydziału przy niepełnych danych.
 - **Punkt startowy:** [AssignmentCreateRequest.java](src/main/java/pl/net/karion/SpotRacer/assignment/api/controller/AssignmentCreateRequest.java), linia 28; [AssignmentUpdateRequest.java](src/main/java/pl/net/karion/SpotRacer/assignment/api/controller/AssignmentUpdateRequest.java), linia 24.
 - **Scenariusz i skutek:** `startDate = null`, ale podane `endDate`. Metoda `isValidDateRange()` przekazuje null do `isBefore`. Adnotacja `@NotNull` nie gwarantuje, że inne walidatory nie zostaną wykonane; walidacja może rzucić wyjątek zamiast zwrócić błąd pola.
 - **Pierwszy krok:** przygotować tabelę przypadków: brak początku, brak końca, obie daty puste, równe daty, koniec przed początkiem.

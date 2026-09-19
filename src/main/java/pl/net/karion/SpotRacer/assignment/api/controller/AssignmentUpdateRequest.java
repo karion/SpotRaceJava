@@ -22,6 +22,7 @@ public record AssignmentUpdateRequest(
     @JsonIgnore
     @AssertTrue(message = "endDate must be >= startDate")
     public boolean isValidDateRange() {
+        if (startDate == null) return false;
         if (endDate == null) return true;
         return !endDate.isBefore(startDate);
     }
