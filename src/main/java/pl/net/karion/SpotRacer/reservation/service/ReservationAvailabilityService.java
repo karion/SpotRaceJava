@@ -66,7 +66,7 @@ public class ReservationAvailabilityService {
             return;
         }
 
-        if (assignment.getUser().getId().equals(currentUser.id())) {
+        if (assignment.getUser().getId().equals(user.getId())) {
             if (!this.isFromTodayToSomeDay(reservationDate, this.properties.assignedWindowDays())) {
                 throw new ReservationTooFarInFutureException();
             }

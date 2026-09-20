@@ -22,9 +22,9 @@ zajmuje miejsce na dzień. Nie zastępuj jednego drugim.
 
 - Jedno miejsce może mieć najwyżej jedną rezerwację na daną datę. Chroni to także ograniczenie bazy `uk_reservation_spot_date` w migracji V5.
 - Sprawdzenie dostępności przed zapisem nie wystarcza przy równoczesnych żądaniach. Zachowuj ograniczenie bazy i uwzględniaj moment zapisu lub zatwierdzenia transakcji przy obsłudze konfliktu.
-- Tworzenie rezerwacji dla innej osoby oraz usuwanie cudzej rezerwacji wymaga roli `ADMIN`.
+- Tworzenie rezerwacji dla innej osoby oraz usuwanie cudzej rezerwacji wymaga roli `ADMIN`. Rezerwacja jest tworzona w kontekście użytkownika, a nie admina.
 - Dla miejsca bez aktywnego przydziału okno obejmuje dziś do dziś + `standardWindowDays`, włącznie z obiema granicami.
-- Jeśli aktywny przydział należy do zalogowanego użytkownika, walidacja stosuje `assignedWindowDays`, również włącznie z granicami.
+- Jeśli aktywny przydział należy do użytkownika, dla którego tworzona jest rezerwacja, walidacja stosuje `assignedWindowDays`, również włącznie z granicami.
 - Miejsce przydzielone komuś innemu można rezerwować tylko na dziś, od `releaseAssignedSpotsAt` włącznie, jeśli nie jest już zarezerwowane.
 - Konfiguracja w `application.properties` wynosi obecnie odpowiednio 1 dzień, 7 dni i 07:00. Używaj `ReservationProperties`, nie kopiuj tych wartości do logiki.
 - Produkcyjny bean `Clock` używa strefy `Europe/Warsaw`.
@@ -33,6 +33,5 @@ zajmuje miejsce na dzień. Nie zastępuj jednego drugim.
 
 ## Miejsca wymagające uwagi
 
-- Walidacja przydziału porównuje jego właściciela z zalogowanym użytkownikiem, a nie z odbiorcą rezerwacji. Przy pracy nad działaniem administratora rezerwującego dla innych sprawdź ten przypadek osobno.
 - Zmieniając dostępność, sprawdzaj jednocześnie `ReservationAvailabilityService`, `CalendarService` i ich testy, aby widok kalendarza odpowiadał możliwości rezerwacji.
 - Nie zakładaj dodatkowych zasad, takich jak zakaz rezerwacji w weekendy, limit jednego miejsca na użytkownika dziennie czy automatyczne pomijanie świąt. Proponuj je dopiero w ramach konkretnego wymagania.
