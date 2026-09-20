@@ -59,7 +59,7 @@ Numery linii wskazują stan kodu podczas przeglądu i mogą się zmieniać.
 
 ### 5. Administrator rezerwujący dla właściciela przydziału
 
-- [ ] **Decyzja biznesowa na podstawie kodu.** Ustalić, czy okno rezerwacji zależy od osoby wykonującej operację, czy od odbiorcy rezerwacji.
+- [x] **Decyzja biznesowa na podstawie kodu.** Ustalić, czy okno rezerwacji zależy od osoby wykonującej operację, czy od odbiorcy rezerwacji.
 - **Punkt startowy:** [ReservationAvailabilityService.java](src/main/java/pl/net/karion/SpotRacer/reservation/service/ReservationAvailabilityService.java), linia 69.
 - **Scenariusz:** administrator bez przydziału rezerwuje na jutro dla jego właściciela. Kod porównuje właściciela z administratorem, więc przechodzi do reguły dla cudzego przydziału i odrzuca datę.
 - **Gotowe, gdy:** decyzja jest zapisana w opisie domeny i przetestowana dla rezerwacji dla siebie, dla właściciela przydziału i dla osoby trzeciej. Rola ADMIN nie powinna otrzymywać dodatkowych wyjątków bez świadomej decyzji.

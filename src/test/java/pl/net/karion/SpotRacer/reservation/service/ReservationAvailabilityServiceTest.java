@@ -414,4 +414,123 @@ public class ReservationAvailabilityServiceTest {
             () -> reservationAvailabilityService.validateReservation(user, spot, reservationDate)
         );
     }
+
+    @Test
+    void shouldAdminReserveTomorrowForUserWithAssignment(
+    ) {
+        //Admin user
+        UUID currentUserId = UUID.randomUUID();
+        CurrentUser currentUser = new CurrentUser(currentUserId, EnumSet.of(Role.ADMIN));
+
+        when(currentUserProvider.currentUser()).thenReturn(currentUser);
+        when(clock.instant()).thenReturn(Instant.parse("2026-05-20T12:00:00Z"));
+        when(clock.getZone()).thenReturn(ZoneOffset.UTC);
+
+        User user = new User(
+            UUID.randomUUID(),
+            "random@email.com",
+            "",
+            "Janina",
+            "Nowacka"
+        );
+
+        Spot spot = new Spot(
+            UUID.randomUUID(),
+            "Wolne",
+            null
+        );
+
+        Assignment assignment = new Assignment(
+            UUID.randomUUID(),
+            user,
+            spot,
+            LocalDate.parse("2026-05-10"),
+            null,
+            null
+        );
+
+        LocalDate reservationDate = LocalDate.parse("2026-05-21");
+
+        when(properties.assignedWindowDays()).thenReturn(7);
+
+        when(reservationRepository.existsBySpotIdAndDate(spot.getId(), reservationDate))
+            .thenReturn(false);
+
+        when(assignmentRepository.findActiveAssignment(spot.getId(), reservationDate))
+            .thenReturn(Optional.of(assignment));
+
+        assertDoesNotThrow(
+            () -> reservationAvailabilityService.validateReservation(user, spot, reservationDate)
+        );
+    }
+
+    @Test
+    void shouldAdminFailReserveTomorrowForOtherUserThanAssignment(
+    ) {
+        //Admin user
+        UUID currentUserId = UUID.randomUUID();
+        CurrentUser currentUser = new CurrentUser(currentUserId, EnumSet.of(Role.ADMIN));
+
+        when(currentUserProvider.currentUser()).thenReturn(currentUser);
+        when(clock.instant()).thenReturn(Instant.parse("2026-05-20T12:00:00Z"));
+        when(clock.getZone()).thenReturn(ZoneOffset.UTC);
+
+        User user = new User(
+            currentUserId,
+            "random@email.com",
+            "",
+            "Janina",
+            "Nowacka"
+        );
+
+        User otherUser = new User(
+            UUID.randomUUID(),
+            "otherRandom@email.com",
+            "",
+            "Niedziela",
+            "Sopocka"
+        );
+
+        Spot spot = new Spot(
+            UUID.randomUUID(),
+            "Wolne",
+            null
+        );
+
+        Assignment assignment = new Assignment(
+            UUID.randomUUID(),
+            user,
+            spot,
+            LocalDate.parse("2026-05-10"),
+            null,
+            null
+        );
+
+        LocalDate reservationDate = LocalDate.parse("2026-05-21");
+
+        when(reservationRepository.existsBySpotIdAndDate(spot.getId(), reservationDate))
+            .thenReturn(false);
+
+        when(assignmentRepository.findActiveAssignment(spot.getId(), reservationDate))
+            .thenReturn(Optional.of(assignment));
+
+        ReservationProperties testProperties = new ReservationProperties(
+            LocalTime.of(7, 0),
+            1,
+            7
+        );
+
+        ReservationAvailabilityService service = new ReservationAvailabilityService(
+            clock,
+            testProperties,
+            assignmentRepository,
+            currentUserProvider,
+            reservationRepository
+        );
+
+        assertThrows(
+            ReservationTooFarInFutureException.class,
+            () -> service.validateReservation(otherUser, spot, reservationDate)
+        );
+    }
 }
