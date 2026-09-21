@@ -67,7 +67,7 @@ Numery linii wskazują stan kodu podczas przeglądu i mogą się zmieniać.
 
 ### 6. Równoczesne rezerwacje i konflikty przy zatwierdzaniu transakcji
 
-- [ ] **Do weryfikacji.** Sprawdzić obsługę konfliktu, gdy dwa żądania rezerwują to samo miejsce na ten sam dzień.
+- [x] **Do weryfikacji.** Sprawdzić obsługę konfliktu, gdy dwa żądania rezerwują to samo miejsce na ten sam dzień.
 - **Punkt startowy:** [ReservationService.java](src/main/java/pl/net/karion/SpotRacer/reservation/service/ReservationService.java), linia 68; [migracja V5](src/main/resources/db/migration/V5__sp_reservation.sql). Analogiczny wzorzec występuje w [UserService.java](src/main/java/pl/net/karion/SpotRacer/user/service/UserService.java), linia 55.
 - **Ryzyko:** oba żądania mogą przejść sprawdzenie istnienia. Ograniczenie bazy chroni dane, ale `catch` otaczający `save()` może nie przechwycić błędu ujawnionego dopiero przy flush lub commit.
 - **Pierwszy krok:** ustalić, kiedy faktycznie jest wykonywany INSERT i gdzie kończy się transakcja.

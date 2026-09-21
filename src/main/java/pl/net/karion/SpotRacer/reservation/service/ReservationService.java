@@ -65,7 +65,7 @@ public class ReservationService {
         );
 
         try {
-            Reservation saved = this.reservationRepository.save(reservation);
+            Reservation saved = this.reservationRepository.saveAndFlush(reservation);
             return ReservationMapper.toResponse(saved);
         } catch (DataIntegrityViolationException ex) {
             if (ex.getCause() instanceof ConstraintViolationException cve) {

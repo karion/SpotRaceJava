@@ -1,16 +1,21 @@
 package pl.net.karion.SpotRacer.reservation.api;
 
+import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import pl.net.karion.SpotRacer.assignment.fixtures.AssignmentFixture;
 import pl.net.karion.SpotRacer.assignment.model.Assignment;
@@ -32,7 +37,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.*;
 
 import static org.mockito.Mockito.when;
 
@@ -236,6 +244,105 @@ class ReservationControllerTest extends IntegrationTest {
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.message").value(ReservationAlreadyTakenException.RESERVATION_ALREADY_TAKEN))
         ;
+    }
+
+    @Test
+    void shouldCreateOnlyOneReservationWhenTwoUsersReserveSameSpotConcurrently() throws Exception {
+        Spot spot = this.spotFixture.createSpot("Spot for reservation");
+        User user = this.userFixture.createUser(UserFixture.randomEmail(), "Sylwia", "Szybka");
+        User otherUser = this.userFixture.createUser(UserFixture.randomEmail(), "Paulina", "Powolna");
+
+        LocalDate tomorrow = LocalDate.now(clock).plusDays(1);
+
+        String body1 = this.createBody(user.getId(), spot.getId(), tomorrow.toString());
+        String body2 = this.createBody(otherUser.getId(), spot.getId(), tomorrow.toString());
+
+        Callable<MvcResult> requestA = () -> {
+            return mockMvc.perform(post("/api/reservation")
+                .with(this.jwtFor(user.getId(), Role.USER))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body1)
+            )
+            .andReturn()
+            ;
+        };
+
+        Callable<MvcResult> requestB = () -> {
+            return mockMvc.perform(post("/api/reservation")
+                .with(this.jwtFor(otherUser.getId(), Role.USER))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body2)
+            )
+            .andReturn()
+            ;
+        };
+
+        Specification<Reservation> spec = (root, query, cb) ->
+            cb.and(
+                cb.equal(root.get("spot"), spot),
+                cb.equal(root.get("date"), tomorrow)
+            );
+
+        CyclicBarrier barrier = new CyclicBarrier(2);
+
+        MethodInterceptor interceptor = invocation -> {
+            boolean matchingCall =
+                invocation.getMethod().getName().equals("existsBySpotIdAndDate")
+                    && invocation.getArguments().length == 2
+                    && spot.getId().equals(invocation.getArguments()[0])
+                    && tomorrow.equals(invocation.getArguments()[1]);
+
+            // Wykonanie oryginalnej metody repozytorium.
+            Object result = invocation.proceed();
+
+            if (matchingCall) {
+                barrier.await(5, TimeUnit.SECONDS);
+            }
+
+            return result;
+        };
+
+        Advised repositoryProxy = (Advised) reservationRepository;
+        repositoryProxy.addAdvice(0, interceptor);
+
+
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            Future<MvcResult> futureA = executor.submit(requestA);
+            Future<MvcResult> futureB = executor.submit(requestB);
+
+            try {
+                MvcResult resultA = futureA.get(10, TimeUnit.SECONDS);
+                MvcResult resultB = futureB.get(10, TimeUnit.SECONDS);
+
+                List<MockHttpServletResponse> responses = List.of(
+                    resultA.getResponse(),
+                    resultB.getResponse()
+                );
+
+                List<Reservation> reservations = this.reservationRepository.findAll(spec);
+                assertThat(reservations).hasSize(1);
+                assertThat(responses.stream().map(MockHttpServletResponse::getStatus))
+                    .containsExactlyInAnyOrder(409, 201);
+                UUID userIdInDb = reservations.getFirst().getUser().getId();
+
+                if (resultA.getResponse().getStatus() == 201) {
+                    jsonPath("$.userId")
+                        .value(user.getId().toString())
+                        .match(resultA);
+                    assertThat(user.getId()).isEqualTo(userIdInDb);
+                } else if (resultB.getResponse().getStatus() == 201) {
+                    jsonPath("$.userId")
+                        .value(otherUser.getId().toString())
+                        .match(resultB);
+                    assertThat(otherUser.getId()).isEqualTo(userIdInDb);
+                }
+            } finally {
+                futureA.cancel(true);
+                futureB.cancel(true);
+            }
+        } finally {
+            repositoryProxy.removeAdvice(interceptor);
+        }
     }
 
     @Test
