@@ -3,6 +3,8 @@ package pl.net.karion.SpotRacer.assignment.service;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.net.karion.SpotRacer.assignment.api.controller.AssignmentCreateRequest;
@@ -13,6 +15,9 @@ import pl.net.karion.SpotRacer.assignment.exception.AssignmentStartDateCannotBeM
 import pl.net.karion.SpotRacer.assignment.exception.SpotAlreadyAssignedException;
 import pl.net.karion.SpotRacer.assignment.model.Assignment;
 import pl.net.karion.SpotRacer.assignment.model.AssignmentRepository;
+import pl.net.karion.SpotRacer.reservation.exception.ReservationAlreadyTakenException;
+import pl.net.karion.SpotRacer.reservation.model.Reservation;
+import pl.net.karion.SpotRacer.reservation.service.ReservationMapper;
 import pl.net.karion.SpotRacer.spot.exception.SpotNotFoundException;
 import pl.net.karion.SpotRacer.spot.model.Spot;
 import pl.net.karion.SpotRacer.spot.model.SpotRepository;
@@ -60,9 +65,19 @@ public class AssignmentService {
             request.note()
         );
 
-        Assignment saved = this.assignmentRepository.save(assignment);
 
-        return AssignmentMapper.toResponse(saved);
+
+        try {
+            Assignment saved = this.assignmentRepository.saveAndFlush(assignment);
+            return AssignmentMapper.toResponse(saved);
+        } catch (DataIntegrityViolationException ex) {
+            if (ex.getCause() instanceof ConstraintViolationException cve) {
+                if ("23P01".equals(cve.getSQLState())) {
+                    throw new SpotAlreadyAssignedException();
+                }
+            }
+            throw ex;
+        }
     }
 
     private boolean canAssignSpot(UUID spotId, LocalDate startDate, LocalDate endDate, UUID assignmentId) {
