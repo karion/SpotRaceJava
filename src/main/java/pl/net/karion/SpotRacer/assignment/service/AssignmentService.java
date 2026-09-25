@@ -65,8 +65,6 @@ public class AssignmentService {
             request.note()
         );
 
-
-
         try {
             Assignment saved = this.assignmentRepository.saveAndFlush(assignment);
             return AssignmentMapper.toResponse(saved);
@@ -132,9 +130,17 @@ public class AssignmentService {
         assignment.setEndDate(request.endDate());
         assignment.setNote(request.note());
 
-        return AssignmentMapper.toResponse(
-            this.assignmentRepository.save(assignment)
-        );
+        try {
+            Assignment saved = this.assignmentRepository.saveAndFlush(assignment);
+            return AssignmentMapper.toResponse(saved);
+        } catch (DataIntegrityViolationException ex) {
+            if (ex.getCause() instanceof ConstraintViolationException cve) {
+                if ("23P01".equals(cve.getSQLState())) {
+                    throw new SpotAlreadyAssignedException();
+                }
+            }
+            throw ex;
+        }
     }
 
     @Transactional

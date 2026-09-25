@@ -299,7 +299,7 @@ public class AssignmentControllerTest  extends IntegrationTest {
     }
 
     @Test
-    void shouldBlockCreatingAssignmentWithOverlappingInSameMoment()throws  Exception {
+    void shouldBlockCreatingAssignmentWithOverlappingInSameMoment() throws  Exception {
         Spot spot = this.spotFixture.createSpot("Very wanted spot");
         User user = this.userFixture.createUser(
             UserFixture.randomEmail(),
@@ -611,6 +611,117 @@ public class AssignmentControllerTest  extends IntegrationTest {
         ;
     }
 
+    @Test
+    void shouldBlockUpdatingAssignmentWithOverlappingInSameMoment() throws  Exception {
+        Spot spot = this.spotFixture.createSpot("Very wanted spot");
+        User user = this.userFixture.createUser(
+            UserFixture.randomEmail(),
+            "Paula",
+            "Pośpieszalska"
+        );
+
+        User otherUser = this.userFixture.createUser(
+            UserFixture.randomEmail(),
+            "Sylwia",
+            "Szybkowska"
+        );
+
+        Assignment assignment1 = this.assignmentFixture.createAssignment(
+            user,
+            spot,
+            LocalDate.now().plusDays(10).toString(),
+            LocalDate.now().plusDays(20).toString(),
+            null
+        );
+
+        Assignment assignment2 = this.assignmentFixture.createAssignment(
+            otherUser,
+            spot,
+            LocalDate.now().plusDays(30).toString(),
+            LocalDate.now().plusDays(40).toString(),
+            null
+        );
+
+        String body1 = this.createBody(
+            user.getId(),
+            spot.getId(),
+            LocalDate.now().plusDays(50).toString(),
+            LocalDate.now().plusDays(60).toString(),
+            null
+        );
+
+        String body2 = this.createBody(
+            otherUser.getId(),
+            spot.getId(),
+            LocalDate.now().plusDays(30).toString(),
+            LocalDate.now().plusDays(55).toString(),
+            null
+        );
+
+        Callable<MvcResult> requestA = () -> {
+            return mockMvc.perform(put("/api/assignment/%s".formatted(assignment1.getId().toString()))
+                    .with(user("admin").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body1)
+                )
+                .andReturn()
+                ;
+        };
+
+        Callable<MvcResult> requestB = () -> {
+            return mockMvc.perform(put("/api/assignment/%s".formatted(assignment2.getId().toString()))
+                    .with(user("admin").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body2)
+                )
+                .andReturn()
+                ;
+        };
+
+        CyclicBarrier barrier = new CyclicBarrier(2);
+
+        MethodInterceptor interceptor = invocation -> {
+            boolean matchingCall =
+                invocation.getMethod().getName().equals("findAll")
+                    && invocation.getArguments().length == 1;
+
+            // Wykonanie oryginalnej metody repozytorium.
+            Object result = invocation.proceed();
+
+            if (matchingCall) {
+                barrier.await(5, TimeUnit.SECONDS);
+            }
+
+            return result;
+        };
+
+        Advised repositoryProxy = (Advised) assignmentRepository;
+        repositoryProxy.addAdvice(0, interceptor);
+
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            Future<MvcResult> futureA = executor.submit(requestA);
+            Future<MvcResult> futureB = executor.submit(requestB);
+
+            try {
+                MvcResult resultA = futureA.get(10, TimeUnit.SECONDS);
+                MvcResult resultB = futureB.get(10, TimeUnit.SECONDS);
+
+                List<MockHttpServletResponse> responses = List.of(
+                    resultA.getResponse(),
+                    resultB.getResponse()
+                );
+
+
+                assertThat(responses.stream().map(MockHttpServletResponse::getStatus))
+                    .containsExactlyInAnyOrder(409, 200);
+            } finally {
+                futureA.cancel(true);
+                futureB.cancel(true);
+            }
+        } finally {
+            repositoryProxy.removeAdvice(interceptor);
+        }
+    }
 
     @Test
     void shouldDeleteAssignment() throws Exception {
