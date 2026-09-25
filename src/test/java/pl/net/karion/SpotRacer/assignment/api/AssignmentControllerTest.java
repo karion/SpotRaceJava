@@ -1,28 +1,41 @@
 package pl.net.karion.SpotRacer.assignment.api;
 
+import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import pl.net.karion.SpotRacer.assignment.fixtures.AssignmentFixture;
 import pl.net.karion.SpotRacer.assignment.model.Assignment;
+import pl.net.karion.SpotRacer.assignment.model.AssignmentRepository;
+import pl.net.karion.SpotRacer.reservation.model.Reservation;
+import pl.net.karion.SpotRacer.reservation.model.ReservationRepository;
 import pl.net.karion.SpotRacer.spot.fixtures.SpotFixture;
 import pl.net.karion.SpotRacer.spot.model.Spot;
 import pl.net.karion.SpotRacer.support.IntegrationTest;
 import pl.net.karion.SpotRacer.user.fixture.UserFixture;
 import pl.net.karion.SpotRacer.user.model.User;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 public class AssignmentControllerTest  extends IntegrationTest {
@@ -38,6 +51,9 @@ public class AssignmentControllerTest  extends IntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private AssignmentRepository assignmentRepository;
 
     @Test
     void shouldCreateAssignment() throws Exception {
@@ -283,6 +299,108 @@ public class AssignmentControllerTest  extends IntegrationTest {
     }
 
     @Test
+    void shouldBlockCreatingAssignmentWithOverlappingInSameMoment() throws  Exception {
+        Spot spot = this.spotFixture.createSpot("Very wanted spot");
+        User user = this.userFixture.createUser(
+            UserFixture.randomEmail(),
+            "Paula",
+            "Pośpieszalska"
+        );
+
+        User otherUser = this.userFixture.createUser(
+            UserFixture.randomEmail(),
+            "Sylwia",
+            "Szybkowska"
+        );
+
+        String body1 = this.createBody(
+            user.getId(),
+            spot.getId(),
+            LocalDate.now().plusDays(5).toString(),
+            null,
+            null
+        );
+
+        String body2 = this.createBody(
+            otherUser.getId(),
+            spot.getId(),
+            LocalDate.now().plusDays(7).toString(),
+            LocalDate.now().plusDays(20).toString(),
+            null
+        );
+
+        Callable<MvcResult> requestA = () -> {
+            return mockMvc.perform(post("/api/assignment")
+                    .with(user("admin").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body1)
+                )
+                .andReturn()
+                ;
+        };
+
+        Callable<MvcResult> requestB = () -> {
+            return mockMvc.perform(post("/api/assignment")
+                    .with(user("admin").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body2)
+                )
+                .andReturn()
+                ;
+        };
+
+        CyclicBarrier barrier = new CyclicBarrier(2);
+
+        MethodInterceptor interceptor = invocation -> {
+            boolean matchingCall =
+                invocation.getMethod().getName().equals("findAll")
+                    && invocation.getArguments().length == 1;
+
+            // Wykonanie oryginalnej metody repozytorium.
+            Object result = invocation.proceed();
+
+            if (matchingCall) {
+                barrier.await(5, TimeUnit.SECONDS);
+            }
+
+            return result;
+        };
+
+        Advised repositoryProxy = (Advised) assignmentRepository;
+        repositoryProxy.addAdvice(0, interceptor);
+
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            Future<MvcResult> futureA = executor.submit(requestA);
+            Future<MvcResult> futureB = executor.submit(requestB);
+
+            try {
+                MvcResult resultA = futureA.get(10, TimeUnit.SECONDS);
+                MvcResult resultB = futureB.get(10, TimeUnit.SECONDS);
+
+                List<MockHttpServletResponse> responses = List.of(
+                    resultA.getResponse(),
+                    resultB.getResponse()
+                );
+
+
+                assertThat(responses.stream().map(MockHttpServletResponse::getStatus))
+                    .containsExactlyInAnyOrder(409, 201);
+            } finally {
+                futureA.cancel(true);
+                futureB.cancel(true);
+            }
+        } finally {
+            repositoryProxy.removeAdvice(interceptor);
+        }
+
+        Specification<Assignment> spec = (root, query, cb) ->
+            cb.equal(root.get("spot"), spot);
+
+        List<Assignment> assignments = this.assignmentRepository.findAll(spec);
+        assertThat(assignments).hasSize(1);
+    }
+
+    @Test
     void shouldReturnAssignmentById() throws Exception {
         Assignment assignment = this.assignmentFixture.createAssignment(
                 "Zenobia",
@@ -493,6 +611,117 @@ public class AssignmentControllerTest  extends IntegrationTest {
         ;
     }
 
+    @Test
+    void shouldBlockUpdatingAssignmentWithOverlappingInSameMoment() throws  Exception {
+        Spot spot = this.spotFixture.createSpot("Very wanted spot");
+        User user = this.userFixture.createUser(
+            UserFixture.randomEmail(),
+            "Paula",
+            "Pośpieszalska"
+        );
+
+        User otherUser = this.userFixture.createUser(
+            UserFixture.randomEmail(),
+            "Sylwia",
+            "Szybkowska"
+        );
+
+        Assignment assignment1 = this.assignmentFixture.createAssignment(
+            user,
+            spot,
+            LocalDate.now().plusDays(10).toString(),
+            LocalDate.now().plusDays(20).toString(),
+            null
+        );
+
+        Assignment assignment2 = this.assignmentFixture.createAssignment(
+            otherUser,
+            spot,
+            LocalDate.now().plusDays(30).toString(),
+            LocalDate.now().plusDays(40).toString(),
+            null
+        );
+
+        String body1 = this.createBody(
+            user.getId(),
+            spot.getId(),
+            LocalDate.now().plusDays(50).toString(),
+            LocalDate.now().plusDays(60).toString(),
+            null
+        );
+
+        String body2 = this.createBody(
+            otherUser.getId(),
+            spot.getId(),
+            LocalDate.now().plusDays(30).toString(),
+            LocalDate.now().plusDays(55).toString(),
+            null
+        );
+
+        Callable<MvcResult> requestA = () -> {
+            return mockMvc.perform(put("/api/assignment/%s".formatted(assignment1.getId().toString()))
+                    .with(user("admin").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body1)
+                )
+                .andReturn()
+                ;
+        };
+
+        Callable<MvcResult> requestB = () -> {
+            return mockMvc.perform(put("/api/assignment/%s".formatted(assignment2.getId().toString()))
+                    .with(user("admin").roles("ADMIN"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body2)
+                )
+                .andReturn()
+                ;
+        };
+
+        CyclicBarrier barrier = new CyclicBarrier(2);
+
+        MethodInterceptor interceptor = invocation -> {
+            boolean matchingCall =
+                invocation.getMethod().getName().equals("findAll")
+                    && invocation.getArguments().length == 1;
+
+            // Wykonanie oryginalnej metody repozytorium.
+            Object result = invocation.proceed();
+
+            if (matchingCall) {
+                barrier.await(5, TimeUnit.SECONDS);
+            }
+
+            return result;
+        };
+
+        Advised repositoryProxy = (Advised) assignmentRepository;
+        repositoryProxy.addAdvice(0, interceptor);
+
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            Future<MvcResult> futureA = executor.submit(requestA);
+            Future<MvcResult> futureB = executor.submit(requestB);
+
+            try {
+                MvcResult resultA = futureA.get(10, TimeUnit.SECONDS);
+                MvcResult resultB = futureB.get(10, TimeUnit.SECONDS);
+
+                List<MockHttpServletResponse> responses = List.of(
+                    resultA.getResponse(),
+                    resultB.getResponse()
+                );
+
+
+                assertThat(responses.stream().map(MockHttpServletResponse::getStatus))
+                    .containsExactlyInAnyOrder(409, 200);
+            } finally {
+                futureA.cancel(true);
+                futureB.cancel(true);
+            }
+        } finally {
+            repositoryProxy.removeAdvice(interceptor);
+        }
+    }
 
     @Test
     void shouldDeleteAssignment() throws Exception {

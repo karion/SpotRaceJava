@@ -138,7 +138,7 @@ public class AssignmentServiceTest {
                 "just note"
         );
 
-        when(assignmentRepository.save(any())).thenReturn(assignment);
+        when(assignmentRepository.saveAndFlush(any())).thenReturn(assignment);
 
         // when
         AssignmentCreateRequest request = new AssignmentCreateRequest(
@@ -151,7 +151,7 @@ public class AssignmentServiceTest {
 
         AssignmentResponse response = assignmentService.create(request);
         //then
-        verify(assignmentRepository).save(any());
+        verify(assignmentRepository).saveAndFlush(any());
 
         assertEquals(spot.getId(), response.spotId());
         assertEquals("A1", response.spotName());
@@ -329,7 +329,7 @@ public class AssignmentServiceTest {
                 "just note"
         );
 
-        when(assignmentRepository.save(any())).thenReturn(updatedAssignment);
+        when(assignmentRepository.saveAndFlush(any())).thenReturn(updatedAssignment);
 
         // when
         AssignmentUpdateRequest request = new AssignmentUpdateRequest(
