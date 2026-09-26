@@ -1,5 +1,6 @@
 package pl.net.karion.SpotRacer.config;
 
+import org.springframework.boot.validation.autoconfigure.ValidationConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,5 +13,12 @@ public class ClockConfiguration {
     @Bean
     Clock clock() {
         return Clock.system(ZoneId.of("Europe/Warsaw"));
+    }
+
+    @Bean
+    ValidationConfigurationCustomizer validationConfigurationCustomizer(Clock clock) {
+        return configuration -> {
+            configuration.clockProvider(() -> clock);
+        };
     }
 }
