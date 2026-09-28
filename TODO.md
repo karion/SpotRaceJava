@@ -76,7 +76,7 @@ Numery linii wskazują stan kodu podczas przeglądu i mogą się zmieniać.
 
 ### 7. Ochrona przed równoczesnymi nakładającymi się przydziałami
 
-- [ ] **Do weryfikacji.** Zapewnić integralność zakresów przy równoległym tworzeniu i aktualizacji przydziałów.
+- [x] **Do weryfikacji.** Zapewnić integralność zakresów przy równoległym tworzeniu i aktualizacji przydziałów.
 - **Punkt startowy:** [AssignmentService.java](src/main/java/pl/net/karion/SpotRacer/assignment/service/AssignmentService.java), linia 68; [migracja V4](src/main/resources/db/migration/V4__sp_assignment.sql).
 - **Ryzyko:** obecna kontrola odczytuje kolizje przed zapisem; migracja nie zawiera ochrony przed nakładaniem zakresów. Dwie transakcje mogą zobaczyć brak przydziału i zapisać sprzeczne dane. `findActiveAssignment()` oczekuje najwyżej jednego wyniku.
 - **Pierwszy krok:** odtworzyć wyścig, następnie porównać możliwe sposoby ochrony danych i ich koszt.
@@ -85,7 +85,7 @@ Numery linii wskazują stan kodu podczas przeglądu i mogą się zmieniać.
 
 ### 8. Spójne źródło czasu i walidacja ustawień
 
-- [ ] **Do weryfikacji.** Sprawdzić zgodność walidacji DTO, serwisów i kalendarza na granicy dnia w `Europe/Warsaw`.
+- [x] **Do weryfikacji.** Sprawdzić zgodność walidacji DTO, serwisów i kalendarza na granicy dnia w `Europe/Warsaw`.
 - **Punkt startowy:** [ClockConfiguration.java](src/main/java/pl/net/karion/SpotRacer/config/ClockConfiguration.java), [ReservationRequest.java](src/main/java/pl/net/karion/SpotRacer/reservation/api/controller/ReservationRequest.java), [ReservationProperties.java](src/main/java/pl/net/karion/SpotRacer/reservation/config/ReservationProperties.java).
 - **Ryzyko:** serwisy korzystają z wstrzykniętego `Clock`, DTO z `@FutureOrPresent`; sam bean `Clock` nie dokumentuje spójnej konfiguracji czasu walidatora. Ustawienia okien nie mają walidacji.
 - **Gotowe, gdy:** test HTTP z kontrolowanym czasem potwierdza spójność przy północy i zmianie czasu; niepoprawne okna, np. ujemne, powodują czytelny błąd konfiguracji. Ustalić również dopuszczalną relację długości obu okien.
