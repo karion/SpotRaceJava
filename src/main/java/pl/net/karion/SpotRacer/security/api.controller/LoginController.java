@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.net.karion.SpotRacer.security.model.UserDetails;
+import pl.net.karion.SpotRacer.security.service.JwtData;
 import pl.net.karion.SpotRacer.security.service.JwtService;
 
 import java.time.Instant;
@@ -45,9 +46,9 @@ public class LoginController {
             if (principal == null) {
                 throw new RuntimeException("Login failed");
             }
-            String token = jwtService.generateToken(principal);
+            JwtData data = jwtService.generateToken(principal);
 
-            return new TokenResponse(token, "Bearer", Instant.now().plus(1, ChronoUnit.HOURS).toString());
+            return new TokenResponse(data.jwt(), "Bearer", data.expiresAt().toString());
         } else {
             throw new RuntimeException("Login failed");
         }

@@ -17,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import pl.net.karion.SpotRacer.assignment.fixtures.AssignmentFixture;
 import pl.net.karion.SpotRacer.assignment.model.Assignment;
 import pl.net.karion.SpotRacer.reservation.exception.ReservationAlreadyTakenException;
@@ -38,7 +39,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -444,6 +444,106 @@ class ReservationControllerTest extends IntegrationTest {
             // Then:
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.message").value(ReservationWithAssignmentNotReleasedYetException.RESERVATION_WITH_ASSIGNMENT_NOT_RELEASED_YET))
+        ;
+    }
+
+    @Test
+    void shouldReserveSpotOnTheEdgeOfTheDay() throws Exception {
+        ZoneId zone = ZoneId.of("Europe/Warsaw");
+        LocalDate today = LocalDate.parse("2024-03-31");
+        Instant beforeRelease = today.atTime(0, 30).atZone(zone).toInstant();
+
+        when(clock.getZone()).thenReturn(zone);
+        when(clock.instant()).thenReturn(beforeRelease);
+
+        User user = this.userFixture.createUser();
+        Spot spot = this.spotFixture.createSpot("Spot for reservation");
+
+        String body = this.createBody(user.getId(), spot.getId(), today.toString());
+
+        mockMvc.perform(post("/api/reservation")
+                .with(this.jwtFor(user.getId(), Role.USER))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+            )
+
+            // Then:
+            .andExpect(status().isCreated())
+        ;
+    }
+
+    @Test
+    void shouldAllowReservationForTodayJustBeforeWarsawMidnight() throws Exception {
+        ZoneId zone = ZoneId.of("Europe/Warsaw");
+        LocalDate today = LocalDate.parse("2024-03-30");
+        Instant beforeRelease = today.atTime(23, 59).atZone(zone).toInstant();
+
+        when(clock.getZone()).thenReturn(zone);
+        when(clock.instant()).thenReturn(beforeRelease);
+
+        User user = this.userFixture.createUser();
+        Spot spot = this.spotFixture.createSpot("Spot for reservation");
+
+        String body = this.createBody(user.getId(), spot.getId(), LocalDate.parse("2024-03-30").toString());
+
+        mockMvc.perform(post("/api/reservation")
+                .with(this.jwtFor(user.getId(), Role.USER))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+            )
+
+            // Then:
+            .andExpect(status().isCreated())
+        ;
+    }
+
+    @Test
+    void shouldRejectReservationForPreviousDayJustAfterWarsawMidnight() throws Exception {
+        ZoneId zone = ZoneId.of("Europe/Warsaw");
+        LocalDate today = LocalDate.parse("2024-03-31");
+        Instant beforeRelease = today.atTime(00, 01).atZone(zone).toInstant();
+
+        when(clock.getZone()).thenReturn(zone);
+        when(clock.instant()).thenReturn(beforeRelease);
+
+        User user = this.userFixture.createUser();
+        Spot spot = this.spotFixture.createSpot("Spot for reservation");
+
+        String body = this.createBody(user.getId(), spot.getId(), LocalDate.parse("2024-03-30").toString());
+
+        mockMvc.perform(post("/api/reservation")
+                .with(this.jwtFor(user.getId(), Role.USER))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+            )
+
+            // Then:
+            .andExpect(status().isBadRequest())
+        ;
+    }
+
+    @Test
+    void shouldAllowReservationAfterDSTChange() throws Exception {
+        ZoneId zone = ZoneId.of("Europe/Warsaw");
+        LocalDate today = LocalDate.parse("2024-03-31");
+        Instant beforeRelease = today.atTime(03, 01).atZone(zone).toInstant();
+
+        when(clock.getZone()).thenReturn(zone);
+        when(clock.instant()).thenReturn(beforeRelease);
+
+        User user = this.userFixture.createUser();
+        Spot spot = this.spotFixture.createSpot("Spot for Daylight Saving Time");
+
+        String body = this.createBody(user.getId(), spot.getId(), LocalDate.parse("2024-03-31").toString());
+
+        mockMvc.perform(post("/api/reservation")
+                .with(this.jwtFor(user.getId(), Role.USER))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+            )
+
+            // Then:
+            .andExpect(status().isCreated())
         ;
     }
 

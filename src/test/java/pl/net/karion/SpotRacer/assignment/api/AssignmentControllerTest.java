@@ -24,8 +24,6 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import pl.net.karion.SpotRacer.assignment.fixtures.AssignmentFixture;
 import pl.net.karion.SpotRacer.assignment.model.Assignment;
 import pl.net.karion.SpotRacer.assignment.model.AssignmentRepository;
-import pl.net.karion.SpotRacer.reservation.model.Reservation;
-import pl.net.karion.SpotRacer.reservation.model.ReservationRepository;
 import pl.net.karion.SpotRacer.spot.fixtures.SpotFixture;
 import pl.net.karion.SpotRacer.spot.model.Spot;
 import pl.net.karion.SpotRacer.support.IntegrationTest;
