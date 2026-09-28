@@ -10,29 +10,35 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
-
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @Service
 public class JwtService {
 
+    private static final Duration EXPIRATION_TIME = Duration.ofHours(1);
     private final JwtEncoder jwtEncoder;
+    private final Clock clock;
 
     public JwtService(
-            JwtEncoder jwtEncoder
+            JwtEncoder jwtEncoder,
+            Clock clock
     ) {
         this.jwtEncoder = jwtEncoder;
+        this.clock = clock;
     }
 
 
-    public String generateToken(UserDetails userDetails) {
-        Instant now = Instant.now();
+    public JwtData generateToken(UserDetails userDetails) {
+        Instant now = Instant.now(clock);
+        Instant expiresAt = now.plus(EXPIRATION_TIME).truncatedTo(ChronoUnit.SECONDS);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("spotracer")
                 .issuedAt(now)
-                .expiresAt(now.plus(1, ChronoUnit.HOURS))
+                .expiresAt(expiresAt)
                 .subject(userDetails.getId().toString())
                 .claim("email", userDetails.getEmail())
                 .claim("roles", userDetails.getRoles().stream()
@@ -42,8 +48,11 @@ public class JwtService {
 
         JwsHeader jwsHeader = JwsHeader.with(SignatureAlgorithm.RS256).build();
 
-        return jwtEncoder
+        return new JwtData(
+            jwtEncoder
                 .encode(JwtEncoderParameters.from(jwsHeader, claims))
-                .getTokenValue();
+                .getTokenValue(),
+            expiresAt
+        );
     }
 }

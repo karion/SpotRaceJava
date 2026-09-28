@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @Component
 public class UserFixture {
+    public final static String UNIVERSAL_PASSWORD = "password123";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -33,7 +34,7 @@ public class UserFixture {
         User user = new User(
                 UUID.randomUUID(),
                 email,
-                passwordEncoder.encode("password123"),
+                passwordEncoder.encode(UNIVERSAL_PASSWORD),
                 firstname,
                 lastname
         );
@@ -45,7 +46,7 @@ public class UserFixture {
         User user = new User(
                 UUID.randomUUID(),
                 email,
-                passwordEncoder.encode("password123"),
+                passwordEncoder.encode(UNIVERSAL_PASSWORD),
                 "Ada",
                 "Admin"
         );
