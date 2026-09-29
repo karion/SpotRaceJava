@@ -17,7 +17,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import pl.net.karion.SpotRacer.assignment.fixtures.AssignmentFixture;
 import pl.net.karion.SpotRacer.assignment.model.Assignment;
 import pl.net.karion.SpotRacer.reservation.exception.ReservationAlreadyTakenException;
