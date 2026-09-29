@@ -1,8 +1,15 @@
 package pl.net.karion.SpotRacer.reservation.service;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.net.karion.SpotRacer.reservation.api.controller.ReservationRequest;
@@ -17,6 +24,7 @@ import pl.net.karion.SpotRacer.security.service.CurrentUserProvider;
 import pl.net.karion.SpotRacer.spot.exception.SpotNotFoundException;
 import pl.net.karion.SpotRacer.spot.model.Spot;
 import pl.net.karion.SpotRacer.spot.model.SpotRepository;
+import pl.net.karion.SpotRacer.spot.service.LocationMapper;
 import pl.net.karion.SpotRacer.user.exception.UserNotFoundException;
 import pl.net.karion.SpotRacer.user.model.Role;
 import pl.net.karion.SpotRacer.user.model.User;
@@ -30,19 +38,22 @@ public class ReservationService {
     private final SpotRepository spotRepository;
     private final CurrentUserProvider currentUserProvider;
     private final ReservationAvailabilityService reservationAvailabilityService;
+    private final Clock clock;
 
     public ReservationService(
         ReservationRepository reservationRepository,
         UserRepository userRepository,
         SpotRepository spotRepository,
         CurrentUserProvider currentUserProvider,
-        ReservationAvailabilityService reservationAvailabilityService
+        ReservationAvailabilityService reservationAvailabilityService,
+        Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.userRepository = userRepository;
         this.spotRepository = spotRepository;
         this.currentUserProvider = currentUserProvider;
         this.reservationAvailabilityService = reservationAvailabilityService;
+        this.clock = clock;
     }
 
     @Transactional
@@ -90,5 +101,34 @@ public class ReservationService {
         }
 
         this.reservationRepository.delete(reservation);
+    }
+
+    public Page<ReservationResponse> getUserReservations(
+        UUID userId,
+        Pageable pageable
+    ) {
+        LocalDate today = LocalDate.now(this.clock);
+        Specification<Reservation> spec = (root, query, cb) ->
+            cb.and(
+                cb.equal(root.get("user").get("id"), userId),
+                cb.greaterThanOrEqualTo(root.get("date"), today)
+            )
+        ;
+        Sort sort = Sort.by(
+            Sort.Order.asc("date"),
+            Sort.Order.asc("spot.location.name"),
+            Sort.Order.asc("spot.name"),
+            Sort.Order.asc("id")
+        );
+
+        Pageable sortedPageable = PageRequest.of(
+            pageable.getPageNumber(),
+            pageable.getPageSize(),
+            sort
+        );
+
+        return this.reservationRepository
+            .findAll(spec, sortedPageable)
+            .map(ReservationMapper::toResponse);
     }
 }
