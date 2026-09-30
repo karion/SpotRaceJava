@@ -5,10 +5,13 @@ COMPOSE := docker compose
 APP_SERVICE := app
 DB_SERVICE := db
 MAIL_SERVICE := mailpit
+MVN_TEST = CalendarServiceTest
 
 APP_PORT := 8081
 DB_PORT := 5432
 MAILPIT_UI_PORT := 8025
+
+-include Makefile.local
 
 .DEFAULT_GOAL := help
 
@@ -202,4 +205,4 @@ open-app: ## Pokaż URL do aplikacji
 
 .PHONY: aa
 aa: ## Uruchom testy Maven w kontenerze app
-	$(COMPOSE) exec $(APP_SERVICE) ./mvnw -U test -Dtest=CalendarServiceTest
+	$(COMPOSE) exec $(APP_SERVICE) ./mvnw -U test -Dtest=$(MVN_TEST)
