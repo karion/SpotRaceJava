@@ -105,7 +105,7 @@ Numery linii wskazują stan kodu podczas przeglądu i mogą się zmieniać.
 
 ### 10. Lista własnych rezerwacji i możliwość anulowania po ponownym wejściu
 
-- [ ] **Propozycja funkcji.** Zaprojektować odczyt rezerwacji zalogowanej osoby.
+- [x] **Propozycja funkcji.** Zaprojektować odczyt rezerwacji zalogowanej osoby.
 - **Punkt startowy:** [ReservationController.java](src/main/java/pl/net/karion/SpotRacer/reservation/api/controller/ReservationController.java), [CalendarDayAvailability.java](src/main/java/pl/net/karion/SpotRacer/calendar/api/controller/CalendarDayAvailability.java).
 - **Uzasadnienie:** API rezerwacji ma POST i DELETE; kalendarz nie zwraca ID rezerwacji potrzebnego do DELETE. Klient, który nie zachował odpowiedzi z POST, nie ma obecnie dedykowanej drogi odczytu tego ID.
 - **Pierwszy krok:** wybrać listę „moje rezerwacje” lub świadome rozszerzenie odpowiedzi kalendarza. Ustalić zakres dat i zasady widoczności.
@@ -122,7 +122,7 @@ Numery linii wskazują stan kodu podczas przeglądu i mogą się zmieniać.
 
 ### 12. Pomiar zapytań kalendarza przed optymalizacją
 
-- [ ] **Do weryfikacji — zadanie późniejsze.** Zmierzyć liczbę zapytań i czas odpowiedzi dla wielu miejsc, lokalizacji i przydziałów.
+- [x] **Do weryfikacji — zadanie późniejsze.** Zmierzyć liczbę zapytań i czas odpowiedzi dla wielu miejsc, lokalizacji i przydziałów.
 - **Punkt startowy:** [CalendarService.java](src/main/java/pl/net/karion/SpotRacer/calendar/service/CalendarService.java), linia 80 i metoda `createDay()`.
 - **Hipoteza:** odczyt powiązanych encji podczas budowania odpowiedzi może powodować dodatkowe zapytania. Nie potwierdzono problemu N+1 pomiarem.
 - **Gotowe, gdy:** istnieje wynik pomiaru dla ustalonego zestawu danych; ewentualna optymalizacja zmniejsza koszt bez zmiany statusów, kolejności miejsc ani obsługi miejsc bez lokalizacji.

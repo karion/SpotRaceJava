@@ -48,6 +48,16 @@ public class SpotFixture {
         return this.spotRepository.save(newSpot);
     }
 
+    public Spot createSpot(String name, Location location) {
+        Spot newSpot = new Spot(
+            UUID.randomUUID(),
+            name,
+            location
+        );
+
+        return this.spotRepository.save(newSpot);
+    }
+
     public Spot createSpotWithoutLocation(String name) {
         Spot spot = new Spot(
             UUID.randomUUID(),
