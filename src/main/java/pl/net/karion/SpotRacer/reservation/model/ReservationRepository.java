@@ -13,6 +13,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID>,
     @Query("""
         select r
         from Reservation r
+        inner join fetch r.user u
+        left join fetch u.roles
         where r.date >= :dateFrom
           and r.date <= :dateTo
         order by date
