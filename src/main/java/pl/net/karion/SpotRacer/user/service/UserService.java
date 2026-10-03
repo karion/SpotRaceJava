@@ -52,7 +52,7 @@ public class UserService {
         user.addRole(Role.USER);
 
         try {
-            User savedUser = userRepository.save(user);
+            User savedUser = userRepository.saveAndFlush(user);
 
             return UserMapper.toResponse(savedUser);
 
