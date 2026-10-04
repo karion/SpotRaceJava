@@ -20,7 +20,7 @@ Lista do samodzielnej realizacji. Poprzednie zadania zostały usunięte; celowo 
 
 ## 3. Stabilna struktura JSON dla odpowiedzi stronicowanych
 
-- [ ] Zastąp bezpośrednią serializację `PageImpl` stabilnym kontraktem odpowiedzi API.
+- [x] Zastąp bezpośrednią serializację `PageImpl` stabilnym kontraktem odpowiedzi API.
 - **Punkt startowy:** endpointy zwracające `Page` w [UserController.java](src/main/java/pl/net/karion/SpotRacer/user/api/controller/UserController.java), [SpotController.java](src/main/java/pl/net/karion/SpotRacer/spot/api/controller/SpotController.java), [LocationController.java](src/main/java/pl/net/karion/SpotRacer/spot/api/controller/LocationController.java) i [MyReservationController.java](src/main/java/pl/net/karion/SpotRacer/reservation/api/controller/MyReservationController.java).
 - **Dlaczego:** Spring Data ostrzega, że struktura JSON powstała przez bezpośrednią serializację `PageImpl` nie jest gwarantowana między wersjami biblioteki. Udokumentowane możliwości to `PagedModel` lub jawnie zdefiniowane DTO odpowiedzi; wybierz jeden kontrakt dla projektu.
 - **Pierwszy krok:** zapisz oczekiwany kształt odpowiedzi: `content`, numer i rozmiar strony, liczba wszystkich elementów i stron. Porównaj go z aktualnym JSON, aby świadomie ocenić wpływ zmiany na klientów API.
