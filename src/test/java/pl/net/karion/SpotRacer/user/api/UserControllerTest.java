@@ -156,7 +156,7 @@ class UserControllerTest extends IntegrationTest {
                         .contentType(APPLICATION_JSON)
                         .with(user("admin").roles("ADMIN")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.numberOfElements", greaterThanOrEqualTo(1)))
+            .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(1)))
             .andExpect(jsonPath("$.content.length()", greaterThanOrEqualTo(1)))
         ;
     }
