@@ -54,4 +54,16 @@ public class UserFixture {
         user.addRole(Role.ADMIN);
         return userRepository.save(user);
     }
+
+    public User createAdminOnlyRole(String email) {
+        User user = new User(
+                UUID.randomUUID(),
+                email,
+                passwordEncoder.encode(UNIVERSAL_PASSWORD),
+                "Ada",
+                "Admin"
+        );
+        user.addRole(Role.ADMIN);
+        return userRepository.save(user);
+    }
 }
