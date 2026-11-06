@@ -2,6 +2,18 @@
 
 Plan do samodzielnej realizacji, w kolejności zależności między etapami. Ukończone zadania poprzedniej tury zostały usunięte. Poniższy opis dotyczy planowanego rozwoju; aktualne zachowanie aplikacji opisuje [domena](docs/ai/domain.md).
 
+## Błędy do poprawy
+
+### Deadlock przy równoczesnej aktualizacji przydziałów
+
+- [ ] Obsłuż konflikt współbieżnych aktualizacji w `AssignmentService.update`, który może zakończyć się deadlockiem podczas sprawdzania ograniczenia `ex_sp_assignment_no_overlap`.
+- **Zaobserwowane 2026-10-25:** pełny zestaw testów raz zakończył się błędem w `AssignmentControllerTest.shouldBlockUpdatingAssignmentWithOverlappingInSameMoment`; ponowne uruchomienie przeszło. Log wskazywał wzajemne oczekiwanie dwóch transakcji i `CannotAcquireLockException` opakowany w `ServletException` oraz `ExecutionException`.
+- **Przyczyna do uwzględnienia:** dwa żądania zmieniają różne przydziały tego samego miejsca na nakładające się zakresy. Obecna obsługa `DataIntegrityViolationException` i SQLSTATE `23P01` nie obejmuje deadlocku (`40P01`).
+- **Punkt startowy:** [AssignmentService.java](src/main/java/pl/net/karion/SpotRacer/assignment/service/AssignmentService.java), metoda `update`; [AssignmentControllerTest.java](src/test/java/pl/net/karion/SpotRacer/assignment/api/AssignmentControllerTest.java), powyższy test i jego `CyclicBarrier`; [V6](src/main/resources/db/migration/V6__sp_assignment_range_validation.sql).
+- **Kierunki do rozważenia:** uporządkowanie operacji dla jednego miejsca przez blokadę rekordu `Spot` przed walidacją albo ograniczone ponawianie całej transakcji po deadlocku. Ponowienie musi obejmować ponowny odczyt i walidację w nowej transakcji; samo ponowienie `saveAndFlush` w przerwanej transakcji nie wystarcza.
+- **Test:** dostosuj synchronizację do wybranej strategii. Przy blokadzie pierwsza transakcja nie może czekać na barierze na drugą, która czeka na tę blokadę; przy ponawianiu samotna kolejna próba nie może utknąć na barierze dla dwóch uczestników. Zachowaj ograniczenie bazy i nie maskuj problemu automatycznym ponawianiem całego testu.
+- **Gotowe, gdy:** równoczesne żądania z tego scenariusza kończą się odpowiedziami 200 i 409 w ustalonym formacie, a odczyt bazy potwierdza brak nakładających się przydziałów i brak częściowego zapisu przegranej operacji. Test obejmuje wybraną obsługę współbieżności; pojedynczy udany przebieg nie jest wystarczającym potwierdzeniem poprawki.
+
 ## Ustalenia biznesowe
 
 - Zarządca parkingów zarządza miejscami i przydziela konkretne miejsca firmom.
