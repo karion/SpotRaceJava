@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.*;
 import pl.net.karion.SpotRacer.assignment.exception.AssignmentNotFoundException;
 import pl.net.karion.SpotRacer.assignment.exception.AssignmentStartDateCannotBeMovedBackException;
 import pl.net.karion.SpotRacer.assignment.exception.SpotAlreadyAssignedException;
+import pl.net.karion.SpotRacer.company.exception.CompanyHaveActiveElements;
+import pl.net.karion.SpotRacer.company.exception.CompanyNameCollision;
+import pl.net.karion.SpotRacer.company.exception.CompanyNotFound;
 import pl.net.karion.SpotRacer.reservation.exception.*;
 import pl.net.karion.SpotRacer.spot.exception.LocationNotFoundException;
 import pl.net.karion.SpotRacer.spot.exception.SpotNotFoundException;
@@ -99,5 +102,22 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(ex.getMessage());
     }
 
+    @ExceptionHandler(CompanyNameCollision.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleCompanyNameCollision(CompanyNameCollision ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(CompanyNotFound.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleCompanyNotFound(CompanyNotFound ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(CompanyHaveActiveElements.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleCompanyHaveActiveElements(CompanyHaveActiveElements ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
 
 }
