@@ -1,4 +1,4 @@
-package pl.net.karion.SpotRacer.company.api;
+package pl.net.karion.SpotRacer.company.api.controller;
 
 import java.util.UUID;
 

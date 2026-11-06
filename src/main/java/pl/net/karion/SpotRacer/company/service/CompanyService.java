@@ -3,23 +3,17 @@ package pl.net.karion.SpotRacer.company.service;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.net.karion.SpotRacer.assignment.exception.SpotAlreadyAssignedException;
-import pl.net.karion.SpotRacer.company.api.CompanyRequest;
-import pl.net.karion.SpotRacer.company.api.CompanyResponse;
+import pl.net.karion.SpotRacer.company.api.controller.CompanyRequest;
+import pl.net.karion.SpotRacer.company.api.controller.CompanyResponse;
 import pl.net.karion.SpotRacer.company.exception.CompanyHaveActiveElements;
 import pl.net.karion.SpotRacer.company.exception.CompanyNameCollision;
 import pl.net.karion.SpotRacer.company.exception.CompanyNotFound;
 import pl.net.karion.SpotRacer.company.model.Company;
 import pl.net.karion.SpotRacer.company.model.CompanyRepository;
-import pl.net.karion.SpotRacer.reservation.exception.ReservationAlreadyTakenException;
-import pl.net.karion.SpotRacer.spot.model.Spot;
-import pl.net.karion.SpotRacer.spot.service.SpotMapper;
-import pl.net.karion.SpotRacer.spot.service.SpotSpecifications;
 
 import java.util.UUID;
 
@@ -82,7 +76,6 @@ public class CompanyService {
     @Transactional
     public void delete(UUID companyId) {
         Company company = companyRepository.findById(companyId).orElse(null);
-
 
         if (company == null) {
             throw new CompanyNotFound();

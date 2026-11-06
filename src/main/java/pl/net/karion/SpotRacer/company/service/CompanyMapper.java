@@ -1,6 +1,6 @@
 package pl.net.karion.SpotRacer.company.service;
 
-import pl.net.karion.SpotRacer.company.api.CompanyResponse;
+import pl.net.karion.SpotRacer.company.api.controller.CompanyResponse;
 import pl.net.karion.SpotRacer.company.model.Company;
 
 public class CompanyMapper {
